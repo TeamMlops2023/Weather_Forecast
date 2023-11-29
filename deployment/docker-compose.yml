@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  app:
+    build: ./app
+    ports:
+      - "8000:8000"
+    volumes:
+      - /home/alain/projet/modele_logs.log:/app/modele_logs.log
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:7.17.15
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    depends_on:
+      - app
+
+volumes:
+  esdata:
+    driver: local
