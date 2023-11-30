@@ -27,7 +27,7 @@ model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécution
 def run_model():
     # Incrémenter le compteur à chaque appel de cette route
     model_execution_counter.inc()
-    df = pd.read_csv("data_features_with_location.csv", index_col=0)
+    df = pd.read_csv("data/data_features_with_location.csv", index_col=0)
 
     # Convert 'year', 'month', 'day' to datetime
     df['date'] = pd.to_datetime(df[['year', 'month', 'day']])
