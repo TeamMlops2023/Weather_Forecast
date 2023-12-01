@@ -25,13 +25,14 @@ model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécution
 
 # Config du repertoire de travail
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-data_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
+csv_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
+
 
 # lecture du fichier CSV
 @app.get("/run_model")
 def run_model():
     model_execution_counter.inc()
-    df = pd.read_csv(data_file_path, index_col=0)
+    df = pd.read_csv(csv_file_path, index_col=0)
 
     # Convert 'year', 'month', 'day' to datetime
     df['date'] = pd.to_datetime(df[['year', 'month', 'day']])
