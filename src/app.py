@@ -80,6 +80,3 @@ def read_logs(lines: int = Query(100, alias="lines")):
     else:
         return "Log file not found."
 
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
