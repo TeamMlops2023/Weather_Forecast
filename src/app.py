@@ -23,11 +23,15 @@ Instrumentator().instrument(app).expose(app)
 # Compteur Prometheus
 model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécutions du modèle')
 
+# Config du repertoire de travail
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
+
+# lecture du fichier CSV
 @app.get("/run_model")
 def run_model():
-    # Incrémenter le compteur à chaque appel de cette route
     model_execution_counter.inc()
-    df = pd.read_csv("data/data_features_with_location.csv", index_col=0)
+    df = pd.read_csv(data_file_path, index_col=0)
 
     # Convert 'year', 'month', 'day' to datetime
     df['date'] = pd.to_datetime(df[['year', 'month', 'day']])
