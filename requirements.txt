@@ -1,7 +1,3 @@
 fastapi
 uvicorn
-numpy
-pandas
-scikit-learn
-prometheus_fastapi_instrumentator
-elasticsearch
+
