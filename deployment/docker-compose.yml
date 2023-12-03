@@ -1,11 +1,13 @@
 version: '3.8'
 services:
   app:
-    build: ../src  # Mise à jour du chemin pour construire à partir du dossier 'src'
+    build:
+      context: ../  # Le contexte de construction est le répertoire parent de 'deployment'
+      dockerfile: deployment/Dockerfile  # Chemin du Dockerfile par rapport au contexte
     ports:
       - "8000:8000"
     volumes:
-      - ../data:/app/data  # Mise à jour pour monter le dossier 'data' correctement
+      - ../data:/app/data  # Assurez-vous que le chemin du volume est correct
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
@@ -33,7 +35,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # Mise à jour du chemin
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # Chemin du fichier de configuration Prometheus
     depends_on:
       - app
 
