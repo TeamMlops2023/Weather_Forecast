@@ -1,13 +1,11 @@
 version: '3.8'
 services:
   app:
-    build: ./app
+    build: ../src  # Mise à jour du chemin pour construire à partir du dossier 'src'
     ports:
       - "8000:8000"
     volumes:
-      - /home/alain/projet/modele_logs.log:/app/modele_logs.log
-    depends_on:
-      - elasticsearch
+      - ../data:/app/data  # Mise à jour pour monter le dossier 'data' correctement
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
@@ -35,7 +33,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # Mise à jour du chemin
     depends_on:
       - app
 
