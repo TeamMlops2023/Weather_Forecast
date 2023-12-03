@@ -24,9 +24,9 @@ Instrumentator().instrument(app).expose(app)
 model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécutions du modèle')
 
 # Config du repertoire de travail
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-csv_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
-
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) -- Pas necessaire le chemin relmtif sera dans le Docker
+# csv_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
+csv_file_path = os.path.join('data', 'data_features_with_location.csv')
 
 # lecture du fichier CSV
 @app.get("/run_model")
