@@ -4,17 +4,14 @@ FROM python:3.9-slim
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier le fichier requirements.txt du répertoire parent dans le répertoire de travail du conteneur
-COPY ../requirements.txt .
+# Copier les fichiers nécessaires du répertoire parent dans le conteneur
+COPY ../requirements.txt ./
+COPY ../src/ ./src/
+COPY ../data/ ./data/
 
 # Installer les dépendances spécifiées dans requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copier les fichiers du dossier src du répertoire parent dans le répertoire de travail du conteneur
-COPY ../src/ .
-
-# Copier les fichiers du dossier data du répertoire parent dans un sous-dossier data du répertoire de travail du conteneur
-COPY ../data/ ./data/
+RUN pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache/pip
 
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
