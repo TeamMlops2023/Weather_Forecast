@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier les fichiers des dossiers src et data dans le conteneur
 COPY ./src/ ./src/
-COPY ./data/ ./data/
+COPY ./data/* ./data/
 
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
