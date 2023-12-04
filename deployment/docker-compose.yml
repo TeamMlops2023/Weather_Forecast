@@ -1,13 +1,11 @@
 version: '3.8'
 services:
   app:
-    build:
-      context: .  # Le contexte de construction est le répertoire actuel
-      dockerfile: Dockerfile  # Utilisation du Dockerfile dans le répertoire courant
+    build: ../src  # Mise à jour du chemin pour construire à partir du dossier 'src'
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data  # Monter le dossier data local
+      - ../data:/app/data  # Mise à jour pour monter le dossier 'data' correctement
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
@@ -35,7 +33,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # Mise à jour du chemin
     depends_on:
       - app
 
