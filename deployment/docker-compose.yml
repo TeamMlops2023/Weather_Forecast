@@ -2,12 +2,12 @@ version: '3.8'
 services:
   app:
     build:
-      context: ../  # Le contexte de construction est le répertoire parent de 'deployment'
-      dockerfile: deployment/Dockerfile  # Chemin du Dockerfile par rapport au contexte
+      context: .  # Le contexte de construction est le répertoire actuel
+      dockerfile: Dockerfile  # Utilisation du Dockerfile dans le répertoire courant
     ports:
       - "8000:8000"
     volumes:
-      - ../data:/app/data  # Assurez-vous que le chemin du volume est correct
+      - ./data:/app/data  # Monter le dossier data local
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
@@ -35,7 +35,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # Chemin du fichier de configuration Prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
 
