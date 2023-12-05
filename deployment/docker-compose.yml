@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../data:/data  # Montage du volume vers un autre répertoire dans le conteneur
+      - ../data:/data  # Montage du volume vers un autre répertoire dans le conteneur 
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
