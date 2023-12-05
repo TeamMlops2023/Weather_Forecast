@@ -2,12 +2,12 @@ version: '3.8'
 services:
   app:
     build:
-      context: ../  # Le contexte de construction est le répertoire parent de 'deployment'
-      dockerfile: deployment/Dockerfile  # Chemin du Dockerfile par rapport au contexte
+      context: ../
+      dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ../data:/app/data  # Assurez-vous que le chemin du volume est correct
+      - ../data:/data  # Montage du volume vers un autre répertoire dans le conteneur
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
