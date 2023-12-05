@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /var/lib/jenkins/workspace/mlops_weather/data:/data  # Chemin absolu
+      - ./data:/data  # Chemin absolu
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
