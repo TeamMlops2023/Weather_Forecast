@@ -2,12 +2,12 @@ version: '3.8'
 services:
   app:
     build:
-      context: ../
+      context: ../  # Assurez-vous que ce chemin est correct
       dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - /var/lib/jenkins/workspace/mlops_weather/data:/data  #  Montage du volume vers un autre répertoire dans le conteneur  
+      - /var/lib/jenkins/workspace/mlops_weather/data:/data  # Chemin absolu
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
