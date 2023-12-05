@@ -4,7 +4,7 @@ FROM python:3.9-slim
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier les fichiers nécessaires du répertoire parent dans le conteneur
+# Copier les fichiers nécessaires du répertoire parent dans le conteneur 
 COPY ../requirements.txt ./
 COPY ../src/ ./src/
 
