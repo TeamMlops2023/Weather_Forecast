@@ -11,7 +11,7 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste des fichiers/dossiers nécessaires dans le conteneur
-COPY src/ /app/
+COPY src/ /app/src/
 COPY data/ /app/data/
 COPY monitoring/ /app/monitoring/
 
