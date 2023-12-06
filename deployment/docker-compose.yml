@@ -2,26 +2,26 @@ version: '3.8'
 services:
   app:
     build:
-      context: ./  # Chemin relatif depuis le répertoire où se trouve le fichier docker-compose.yml
+      context: ../  # Assurez-vous que ce chemin est correct
       dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - /tmp/data:/data:rw  # Chemin absolu
+      - /var/lib/jenkins/workspace/mlops_weather/data:/data:rw  # Chemin absolu
 
   grafana:
-  image: grafana/grafana:latest
-  ports:
-    - "3000:3000"
-  volumes:
-    - /tmp/grafana-data:/var/lib/grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/lib/grafana:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      - /tmp/prometheus-config:/etc/prometheus  # Chemin du fichier de configuration Prometheus
+      - /var/lib/prometheus:/etc/prometheus  # Chemin du fichier de configuration Prometheus
     depends_on:
       - app
 
