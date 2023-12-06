@@ -18,5 +18,5 @@ COPY monitoring/ /app/monitoring/
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
 
-# Définir la commande pour démarrer l'application via Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Définir la commande pour démarrer l'application via start_server.py
+CMD ["python", "src/start_server.py"]
