@@ -6,14 +6,14 @@ WORKDIR /app
 
 # Copier le fichier des exigences et le dossier 'src' dans le conteneur
 COPY ./requirements.txt /app/
-COPY ./src /app/
+COPY ../src /app/
 
 # Installer les dépendances spécifiées dans requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier les autres dossiers nécessaires dans le conteneur
-COPY ./data /app/data
-COPY ./monitoring/prometheus.yml /app/monitoring/
+COPY ../data /app/data
+COPY ../monitoring/prometheus.yml /app/monitoring/
 
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
