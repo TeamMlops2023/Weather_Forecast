@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../data:/app/data
+      - /var/lib/jenkins/workspace/mlops_weather/data:/app/data
       - ../monitoring:/app/monitoring
 
   grafana:
