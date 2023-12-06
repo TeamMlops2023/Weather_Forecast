@@ -5,8 +5,8 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copier les fichiers nécessaires dans le conteneur
-COPY requirements.txt ./ 
-COPY src/ ./src/
+COPY /var/lib/jenkins/workspace/mlops_weather/deployment/requirements.txt ./ 
+COPY /var/lib/jenkins/workspace/mlops_weather/src/ ./src/
 
 # Installer les dépendances spécifiées dans requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt \
@@ -17,4 +17,3 @@ EXPOSE 8000
 
 # Définir la commande pour démarrer l'application via Uvicorn
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
