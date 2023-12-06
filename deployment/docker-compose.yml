@@ -10,11 +10,11 @@ services:
       - /tmp/data:/data:rw  # Chemin absolu
 
   grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    volumes:
-      - /tmp/grafana-data:/var/lib/grafana
+  image: grafana/grafana:latest
+  ports:
+    - "3000:3000"
+  volumes:
+    - /tmp/grafana-data:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus
