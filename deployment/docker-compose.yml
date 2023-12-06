@@ -8,7 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - ~/mlops_weather_data:/app/data
-      - ../monitoring:/app/monitoring
+      - ~/mlops_weather_monitoring:/app/monitoring
 
   grafana:
     image: grafana/grafana:latest
@@ -22,7 +22,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ~/mlops_weather_monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
 
