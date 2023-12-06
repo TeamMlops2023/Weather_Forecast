@@ -2,13 +2,13 @@ version: '3.8'
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./monitoring:/app/monitoring
+      - ../data:/app/data
+      - ../monitoring:/app/monitoring
 
   grafana:
     image: grafana/grafana:latest
@@ -22,7 +22,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
 
