@@ -2,14 +2,13 @@ version: '3.8'
 services:
   app:
     build:
-      context: ../  # Assurez-vous que ce chemin est correct
+      context: ./  # Chemin relatif depuis le répertoire où se trouve le fichier docker-compose.yml
       dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
       - /tmp/data:/data:rw  # Chemin absolu
 
- 
   grafana:
     image: grafana/grafana:latest
     ports:
