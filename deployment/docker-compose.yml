@@ -2,29 +2,30 @@ version: '3.8'
 services:
   app:
     build:
-      context: ../  # Assurez-vous que ce chemin est correct
-      dockerfile: deployment/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - /var/lib/jenkins/workspace/mlops_weather/data:/data:rw  # Chemin absolu
+      - ./data:/app/data
+      - ./monitoring:/app/monitoring
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
     volumes:
-      - /var/lib/grafana:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      - /var/lib/prometheus:/etc/prometheus  # Chemin du fichier de configuration Prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
 
 volumes:
-  esdata:
+  grafana_data:
     driver: local
