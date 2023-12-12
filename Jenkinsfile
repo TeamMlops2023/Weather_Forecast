@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // Définir le nom de l'image Docker
-        DOCKER_IMAGE = 'monapp/fastapi'
-        // Définir le nom du conteneur
-        CONTAINER_NAME = 'monapp-fastapi'
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
@@ -16,35 +9,21 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Run Tests') {
             steps {
-                // Construire l'image Docker à partir du Dockerfile
-                script {
-                    docker.build(DOCKER_IMAGE)
-                }
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
-                // Supprimer le conteneur s'il existe déjà
-                script {
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
-                }
-                // Démarrer un nouveau conteneur à partir de l'image construite
-                script {
-                    sh "docker run -d --name ${CONTAINER_NAME} -p 8000:8000 ${DOCKER_IMAGE}"
-                }
+                // Exécuter un script de test fictif ou une commande
+                // Remplacez ceci par la commande que vous souhaitez exécuter
+                sh 'echo "Running tests..."'
+                // Par exemple, si vous avez un script de test :
+                // sh './run-tests.sh'
             }
         }
     }
     
     post {
         always {
-            // Nettoyer les images Docker après la construction
-            script {
-                sh "docker rmi ${DOCKER_IMAGE} || true"
-            }
+            // Mettez ici les étapes de nettoyage si nécessaire
+            echo 'Cleaning up...'
         }
     }
 }
