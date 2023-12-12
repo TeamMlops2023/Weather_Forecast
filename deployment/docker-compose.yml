@@ -2,13 +2,22 @@ version: '3.8'
 services:
   app:
     build:
-      context: ..
+      context: .
       dockerfile: deployment/Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ~/mlops_weather_data:/app/data
-      - ~/mlops_weather_monitoring:/app/monitoring
+      - ./data:/app/data
+      - ./monitoring:/app/monitoring
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
 
   grafana:
     image: grafana/grafana:latest
@@ -16,16 +25,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ~/mlops_weather_monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
-      - app
+      - prometheus
 
 volumes:
   grafana_data:
-    driver: local
