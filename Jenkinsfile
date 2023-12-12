@@ -2,27 +2,28 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                // Cloner le dépôt GitHub
                 checkout scm
             }
         }
-        
+        stage('Build and Deploy') {
+            steps {
+                sh 'docker-compose -f deployment/docker-compose.yml build'
+                sh 'docker-compose -f deployment/docker-compose.yml up -d'
+            }
+        }
         stage('Run Tests') {
             steps {
-                // Exécuter un script de test fictif ou une commande
-                // Remplacez ceci par la commande que vous souhaitez exécuter
                 sh 'echo "Running tests..."'
-                // Par exemple, si vous avez un script de test :
-                // sh './run-tests.sh'
+                // Exécutez ici vos scripts de test
             }
         }
     }
     
     post {
         always {
-            // Mettez ici les étapes de nettoyage si nécessaire
+            sh 'docker-compose -f deployment/docker-compose.yml down'
             echo 'Cleaning up...'
         }
     }
