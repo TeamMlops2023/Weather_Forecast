@@ -27,6 +27,16 @@
     - prometheus.yml
         => fichier déclaratif du bloc prométheus
 
+# Docker
+    - image-app
+        => contient le dockerfile pour créer l'image du containers fastapi utilisé
+    - docker-compose.yml
+        => Fichier compose pour tester un ensemble de container en local
+
+# Jenkins
+    - Jenkinsfile
+        => Fichier exécutable pour Jenkins
+        
 # contributeurs.txt
     => Fichir pour faire des test sur les commandes git/github
 
