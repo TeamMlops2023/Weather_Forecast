@@ -28,6 +28,24 @@ model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécution
 # csv_file_path = os.path.join(BASE_DIR, 'data', 'data_features_with_location.csv')
 csv_file_path = os.path.join('data', 'data_features_with_location.csv')
 
+# Contrôle de l'api
+@app.get('/', name="Bonjour")
+def get_status():
+    """
+    Description:
+    Retourne un bonjour pour vérifier que l'api fonctionne.
+
+    Args:
+    Aucun argument requis.
+
+    Returns:
+    - str: Le message "Bonjour et bienvenue !".
+
+    Raises:
+    Pas de raises.
+    """
+    return "Bonjour et bienvenue !"
+
 # lecture du fichier CSV
 @app.get("/run_model")
 def run_model():
