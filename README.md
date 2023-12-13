@@ -20,7 +20,7 @@
         => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir tester le bloc fastapi
     - setup_clean_fastapi.sh
         => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
-    - commandes_test.txt
+    - commandes_test_fastapi.txt
         => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
 
 # test
