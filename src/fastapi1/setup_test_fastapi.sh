@@ -1,5 +1,5 @@
 # Copy du fichier data dans le fichier src (à supprimer une fois le code corrigé)
-cp -r ../data .
+cp -r ../../data .
 
 # Création de l'environnement temporaire
 python3 -m venv env_temp
