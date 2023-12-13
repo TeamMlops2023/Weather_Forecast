@@ -25,4 +25,4 @@ RUN pip install --no-cache-dir -r /app/src/requirements.txt
 EXPOSE 8000
 
 # Définir la commande pour démarrer l'application via start_server.py
-CMD ["python", "start_server.py"]
+CMD ["python", "src/start_server.py"]
