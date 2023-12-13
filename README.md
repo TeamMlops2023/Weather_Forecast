@@ -1,15 +1,14 @@
 ### Weather_Forecast
 
-# data
-    - data_features_with_location.csv
-        => contient les données nécessaires à l'entrainement du modèle.
-
 # notebook
     - ... ====> Ce dossier serait intéressant pour isoler le code du modèle ML utilisé qu'on intègrera par la suite à app.py via import
 
 # code
-    - fastapi1 :
-        src :  
+    # fastapi1 :
+        # data :
+                - data_features_with_location.csv
+                    => contient les données nécessaires à l'entrainement du modèle.
+        # src :  
              - app.py 
                    => Code python définisant l'application Fastapi et le modèle utilisé (création, entrainement et prédiction)
                - start_server.py
@@ -24,9 +23,9 @@
                    => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
               - commandes_test_fastapi.txt
                   => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
-        docker :
+        # docker :
             - Dockerfile
-    - app2 :
+    #  app2 :
         => anticipation d'une autre app
     - docker-compose.yml
         => Docker-compose pour faire les tests d'intégration sur un ensemble docker

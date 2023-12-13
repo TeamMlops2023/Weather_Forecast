@@ -84,7 +84,7 @@ Etape 3.X : Création de différents bloc en suivant ce principe selon le besoin
 Etape 4.1 : Containerisation Docker
     On va créer les différentes images et tester l'ensemble avec un docker-compose
     
-    => Pour chaque bloc qui nécessite que l'on créer notre propre image on va créer un dossier image_bloc_name (pour l'instant il n'y en a qu'un)
+    => Pour chaque bloc qui nécessite que l'on créer notre propre image on va créer un dossier docker dans la partie code.
         => Dans ce dossier on ajoute un fichier Dockerfile
         => On developpe le code du Dockerfile
         => Une fois terminé on va le tester, pour cela :
