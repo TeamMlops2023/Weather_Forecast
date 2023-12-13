@@ -19,7 +19,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Installer les dépendances spécifiées dans requirements.txt
-RUN pip install --no-cache-dir -r /app/src/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
