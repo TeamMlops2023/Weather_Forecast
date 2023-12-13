@@ -14,6 +14,14 @@
         => Code python exécutable qui sera utilisé pour lancer l'application Fastapi via uvicorn
     - requirements.txt
         => liste des packages nécessaire pour l'exécution du code de src.
+    - model_logs.log
+        => Fichier log créer par l'appel à fastapi /logs
+    - setup_test_fastapi.sh
+        => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir tester le bloc fastapi
+    - setup_clean_fastapi.sh
+        => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
+    - commandes_test.txt
+        => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
 
 # test
     - test_metrics.py
