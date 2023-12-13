@@ -45,7 +45,7 @@ Etape 3.1 : Ajout du bloc code fastapi
 
         Pour la création d'un environnement :
             - Création de l'environnement : 
-                => python -m venv env_name
+                => python3 -m venv env_name
             - Activation de l'environnement :
                 => source env_name/bin/activate
             - Désactivation de l'environnement (à la fin) :
@@ -54,14 +54,25 @@ Etape 3.1 : Ajout du bloc code fastapi
 
         Pour éxécuter le code fastapi :
             - On import les packages nécessaire dont :
-                => pip3 install fastapi httptools==0.1.* uvloop
-                => sudo apt install uvicorn
+                => pip install --no-cache-dir -r requirements.txt
             - Exécution du code app.py directement :
                 => uvicorn app:app --reload  (app:app => nom du fichier:nom de l'élément fastapi créé)
             - On peut ensuite développer et tester le code
-            - Une fois terminé on récupère les packages dans un fichier requirements.txt et on sortir de l'environnement temporaire
+            - Une fois terminé on récupère les packages dans un fichier requirements.txt et on sort de l'environnement temporaire que l'on supprime pour ne pas le monter sur github
             - Pour récuperer les packages :
                 => pip3 freeze > requirements.txt
+            - Pour sortir de l'environnement temporaire :
+                => deactivate
+            - Pour supprimer l'environnement temporaire :
+                => rm -r env
+
+
+            PS : 
+            - j'ai créer deux fichiers setup qui rassemble les requêtes (avant test fastapi et après pour nettoyage) => setup_test_fastapi.sh et setup_clean_fastapi.sh
+                    => source setup_test_fastapi.sh
+                    => source setup_clean_fastapi.sh
+            - En ce qui concerne le dossier __pycache__ à voir ce qu'il faut faire ... Pour l'instant je supprime
+            - Pour le fichier modele_logs.log il faut déterminer la démarche pour l'instant je supprime avant le lancement de l'api
 
     => On peut boucler sur l'étape précédente en sauvegardant régulièrement sur git jusqu'à satisfaction
 
