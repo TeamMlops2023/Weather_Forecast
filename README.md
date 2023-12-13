@@ -5,6 +5,7 @@
 
 # code
     # fastapi1 :
+        => bloc fastapi1 pour première api
         # data :
                 - data_features_with_location.csv
                     => contient les données nécessaires à l'entrainement du modèle.
@@ -23,10 +24,33 @@
                    => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
               - commandes_test_fastapi.txt
                   => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
-        # docker :
-            - Dockerfile
+        - Dockerfile
+        - setup_docker_hub.sh
+            => fichier bash pour auto l'envoi dans docker-hub de l'image
     #  app2 :
-        => anticipation d'une autre app
+        => bloc test auto du bloc fastapi1
+        # data :
+                - data_features_with_location.csv
+                    => contient les données nécessaires à l'entrainement du modèle.
+        # src :  
+             - app.py 
+                   => Code python définisant l'application Fastapi et le modèle utilisé (création, entrainement et prédiction)
+               - start_server.py
+                  => Code python exécutable qui sera utilisé pour lancer l'application Fastapi via uvicorn
+               - requirements.txt
+                   => liste des packages nécessaire pour l'exécution du code de src.
+               - model_logs.log
+                  => Fichier log créer par l'appel à fastapi /logs
+               - setup_test_fastapi.sh
+                  => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir tester le bloc fastapi
+              - setup_clean_fastapi.sh
+                   => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
+              - commandes_test_fastapi.txt
+                  => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
+        - Dockerfile
+        - setup_docker_hub.sh
+            => fichier bash pour auto l'envoi dans docker-hub de l'image
+            
     - docker-compose.yml
         => Docker-compose pour faire les tests d'intégration sur un ensemble docker
 

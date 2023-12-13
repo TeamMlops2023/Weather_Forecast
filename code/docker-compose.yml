@@ -1,32 +1,65 @@
 version: '3.8'
 services:
   app:
-    build:
-      context: .
-      dockerfile: deployment/Dockerfile
+    image: my_image_fastapi1
+    container_name: app_from_compose
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./monitoring:/app/monitoring
+      - ./fastapi1/data:/app/data
+      - ./fastapi1/monitoring:/app/monitoring
+    # Partie 2  (intégration network)
+    networks:
+      - my_network
 
+  # Partie 2 (intégration du service test_api)
+  test_api:
+    image: my_image_test_fastapi
+    container_name: test_fastapi_from_compose
+    command: bash -c '/my_test/wait-for-it.sh app:8000 -- python3 /my_test/test_fastapi1.py'
+    depends_on: 
+      - app
+    volumes:
+      - my_volume:/home/my_log
+    networks:
+      - my_network
+      
   prometheus:
     image: prom/prometheus
+    container_name: prometheus_from_compose
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./fastapi1/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    # Partie 2  (intégration network)
+    networks:
+      - my_network
     depends_on:
       - app
 
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana_from_compose
     ports:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+    # Partie 2  (intégration network)
+    networks:
+      - my_network
     depends_on:
       - prometheus
 
 volumes:
   grafana_data:
+  # Partie 2 (intégration my_volume)
+  my_volume:
+
+# Partie 2  (intégration network)
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.0.0/16
+          gateway: 172.50.0.1

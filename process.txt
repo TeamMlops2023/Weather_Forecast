@@ -93,6 +93,12 @@ Etape 4.1 : Containerisation Docker
             => On créer un container : docker container run --rm --network my_network_test --name bloc_name my_image_name (à adapter)
             => On applique les test définis en amont
             => Un fois validé on arrête le tout
+
+            exemple : 
+                => docker image build . -t my_image_fastapi1:latest
+                => docker container run --rm -p 8000:8000 --name bloc_name my_image_fastapi1
+                => je test sur l'IHM via localhost:8000
+                => sur un autre terminal : docker container stop bloc_name
         
             Remarques : 
             On peut s'implifier ce process et le rendre plus progressif en travaillant directement avec un docker-compose.
@@ -101,11 +107,19 @@ Etape 4.1 : Containerisation Docker
             C'est plus pratique si on a plusieurs bloc.
             Dans tous les cas le docker-compose permet de faciliter l'automatisation des test d'intégration.
 
+            exemple : 
+                Ici j'ai ajouté un bloc app2 qui va juste servire à tester fastapi1.
+                Une fois l'image créer je peux lancer le compose.
+                    => docker-compose up
+                    => Dans un autre terminal je peux voir le contenu des volumes (ici pour le volume log du test)
+                        => sudo ls /var/lib/docker/volumes/code_my_volume/_data
+                        => sudo cat /var/lib/docker/volumes/code_my_volume/_data/api_test.log
+
     => Pour faciliter cette partie je conseil l'utilisation de fichier setup.sh/setup_remove.sh qui permettent de lancer plusieurs commande d'un coup.
         Cela fait gagné beaucoup de temps et évite l'erreur humaine.
 
 Etape 4.2 : Envoie à docker hub
-    Comme son nom l'indique l'idée ici est de mettre en place un fichier setup.sh qui défini les commandes pour envoyer une image sur le hub.
+    Comme son nom l'indique l'idée ici est de mettre en place un fichier setup_docker_hub.sh qui défini les commandes pour envoyer une image sur le hub.
     Voici un exemple :
         docker image build . -t my_image:latest
 
