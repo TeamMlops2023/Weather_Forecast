@@ -5,15 +5,15 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copier le fichier des exigences dans le conteneur
-COPY requirements.txt /app/
+COPY ../../src/fastapi1/requirements.txt /app/
 
 # Installer les dépendances spécifiées dans requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste des fichiers/dossiers nécessaires dans le conteneur
-COPY src/ /app/src/
-COPY data/ /app/data/
-COPY monitoring/ /app/monitoring/
+COPY ../../src/fastapi1/ /app/src/
+COPY ../../data/ /app/data/
+COPY ../../monitoring/ /app/monitoring/
 
 # Exposer le port 8000 pour l'application FastAPI
 EXPOSE 8000
