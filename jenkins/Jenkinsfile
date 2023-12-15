@@ -2,16 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Préparation') {
-            steps {
-                script {
-                    // Installez docker-compose
-                    sh 'curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
-                    sh 'chmod +x /usr/local/bin/docker-compose'
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 // Assurez-vous de spécifier la branche que vous souhaitez extraire
@@ -22,12 +12,21 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 script {
-                    // Utiliser le chemin complet vers le fichier docker-compose.yml
-                    sh 'docker-compose -f code/docker-compose.yml up -d'
+                    // Utiliser le chemin relatif vers le fichier docker-compose.yml
+                    sh 'docker-compose -f docker-compose.yml up -d'
                 }
             }
         }
 
         // Ajoutez d'autres étapes au besoin
+    }
+
+    post {
+        always {
+            script {
+                // Nettoyer les services Docker Compose après le build
+                sh 'docker-compose -f docker-compose.yml down'
+            }
+        }
     }
 }
