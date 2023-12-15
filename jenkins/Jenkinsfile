@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Cloner le dépôt Git
                 git 'https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
@@ -12,21 +11,13 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 script {
-                    // Naviguer au répertoire contenant le docker-compose.yml
                     dir('Weather_Forecast') {
-                        // Lancer docker-compose
                         sh 'docker-compose up -d'
                     }
                 }
             }
         }
 
-        // Vous pouvez ajouter des étapes supplémentaires si nécessaire
-    }
-
-    post {
-        always {
-            // Actions de nettoyage ou autres étapes post-build
-        }
+        // Ajoutez d'autres étapes au besoin
     }
 }
