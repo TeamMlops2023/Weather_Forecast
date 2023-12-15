@@ -4,27 +4,29 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // Cloner le dépôt Git
+                git 'https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
+
         stage('Build and Deploy') {
             steps {
-                sh 'docker-compose -f deployment/docker-compose.yml build'
-                sh 'docker-compose -f deployment/docker-compose.yml up -d'
+                script {
+                    // Naviguer au répertoire contenant le docker-compose.yml
+                    dir('Weather_Forecast') {
+                        // Lancer docker-compose
+                        sh 'docker-compose up -d'
+                    }
+                }
             }
         }
-        stage('Run Tests') {
-            steps {
-                sh 'echo "Running tests..."'
-                // Exécutez ici vos scripts de test
-            }
-        }
+
+        // Vous pouvez ajouter des étapes supplémentaires si nécessaire
     }
-    
+
     post {
         always {
-            sh 'docker-compose -f deployment/docker-compose.yml down'
-            echo 'Cleaning up...'
+            // Actions de nettoyage ou autres étapes post-build
         }
     }
 }
