@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Assurez-vous de spécifier la branche que vous souhaitez extraire
                 git branch: 'BAS_ALAIN', url: 'https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
@@ -12,19 +11,15 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 script {
-                    // Mettre à jour le chemin vers le fichier docker-compose.yml
                     sh 'docker-compose -f code/docker-compose.yml up -d'
                 }
             }
         }
-
-        // Ajoutez d'autres étapes au besoin
     }
 
     post {
         always {
             script {
-                // Nettoyer les services Docker Compose après le build
                 sh 'docker-compose -f code/docker-compose.yml down'
             }
         }
