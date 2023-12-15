@@ -12,8 +12,8 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 script {
-                    // Utiliser le chemin relatif vers le fichier docker-compose.yml
-                    sh 'docker-compose -f docker-compose.yml up -d'
+                    // Mettre à jour le chemin vers le fichier docker-compose.yml
+                    sh 'docker-compose -f code/docker-compose.yml up -d'
                 }
             }
         }
@@ -25,7 +25,7 @@ pipeline {
         always {
             script {
                 // Nettoyer les services Docker Compose après le build
-                sh 'docker-compose -f docker-compose.yml down'
+                sh 'docker-compose -f code/docker-compose.yml down'
             }
         }
     }
