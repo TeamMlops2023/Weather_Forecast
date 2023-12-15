@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Commande pour démarrer l'application en utilisant uvicorn
-CMD ["python", "/usr/src/app/start-server.py"]
+CMD ["python", "/usr/src/app/start_server.py"]
