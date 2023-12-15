@@ -18,11 +18,6 @@ RUN apt-get update && \
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier le reste des fichiers/dossiers nécessaires dans le conteneur
-COPY src/ /app/src/
-COPY data/ /app/data/
-COPY monitoring/ /app/monitoring/
-
 # Installer les dépendances spécifiées dans requirements.txt
 RUN pip install --no-cache-dir -r /app/src/requirements.txt
 
