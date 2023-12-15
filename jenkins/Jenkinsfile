@@ -17,11 +17,11 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            script {
-                sh 'docker-compose -f code/docker-compose.yml down'
-            }
-        }
-    }
+   // post {
+     //   always {
+       //     script {
+         //       sh 'docker-compose -f code/docker-compose.yml down'
+        //    }
+      //  }
+  //  }
 }
