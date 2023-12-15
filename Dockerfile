@@ -2,7 +2,7 @@
 FROM jenkins/jenkins:lts
 
 # (Optionnel) Installer des plugins Jenkins supplémentaires
-RUN /usr/local/bin/install-plugins.sh <liste-des-plugins>
+# RUN /usr/local/bin/install-plugins.sh <liste-des-plugins>
 
 # (Optionnel) Copier les fichiers de configuration personnalisés, les jobs, etc.
 # COPY --chown=jenkins:jenkins config.xml /var/jenkins_home/config.xml
