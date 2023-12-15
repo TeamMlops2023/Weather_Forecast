@@ -4,16 +4,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/TeamMlops2023/Weather_Forecast.git'
+                git branch: 'BAS_ALAIN', url: 'https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
 
         stage('Build and Deploy') {
             steps {
                 script {
-                    dir('Weather_Forecast') {
-                        sh 'docker-compose up -d'
-                    }
+                    // Assurez-vous que le chemin du répertoire est correct et que docker-compose.yml est à cet emplacement
+                    sh 'docker-compose -f Weather_Forecast/docker-compose.yml up -d'
                 }
             }
         }
