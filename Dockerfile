@@ -1,12 +1,13 @@
-# Utilisez l'image Jenkins officielle comme base
-FROM jenkins/jenkins:latest
+# Utilisez l'image Ubuntu 20.04 LTS comme base
+FROM ubuntu:20.04
 
-# Installez Docker
-USER root
+# Installez les dépendances
 RUN apt-get update && \
     apt-get -y install apt-transport-https ca-certificates curl software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+# Ajoutez le référentiel Docker
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" && \
     apt-get update && \
     apt-get -y install docker-ce && \
     usermod -aG docker jenkins
