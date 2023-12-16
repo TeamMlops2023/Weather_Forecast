@@ -9,7 +9,7 @@ COPY src/ .
 COPY data/ data/
 
 # Installez les dépendances
-RUN pip install numpy==1.26.2
+RUN pip install numpy
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Exposez le port sur lequel l'application va s'exécuter
