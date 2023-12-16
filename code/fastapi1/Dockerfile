@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Copiez les fichiers nécessaires dans le conteneur
 COPY src/ .
-# COPY data/ data/
+COPY data/ data/
 
 # Installez les dépendances
 RUN pip install --no-cache-dir -r requirements.txt
