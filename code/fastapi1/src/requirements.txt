@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-numpy==1.24.4
+numpy
 pandas
 scikit-learn
 prometheus_fastapi_instrumentator
