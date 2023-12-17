@@ -7,6 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
+from elasticsearch import Elasticsearch
 
 # Configuration du logging pour écrire dans un fichier spécifique.
 logging.basicConfig(filename='modele_logs.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,6 +20,9 @@ Instrumentator().instrument(app).expose(app)
 
 # Compteur Prometheus pour suivre le nombre d'exécutions du modèle.
 model_execution_counter = Counter('model_execution_count', 'Nombre d\'exécutions du modèle')
+
+# Connexion à Elasticsearch
+es = Elasticsearch("http://localhost:9200")
 
 # Chemin vers le fichier CSV contenant les données.
 csv_file_path = 'data/data_features_with_location.csv'
@@ -64,12 +68,16 @@ def run_model():
         'City': le.inverse_transform(X_test['location_encoded']),
         'Predicted': y_pred
     })
-    rain_predictions = predictions[predictions['Predicted'] == 1]
+    rain_predictions = predictions[predictions['Predicted'] == 1].to_dict(orient='records')
+
+    # Envoi des prédictions à Elasticsearch
+    for prediction in rain_predictions:
+        es.index(index="rain_predictions", document=prediction)
 
     # Retourne la précision et les prédictions de pluie au format JSON.
     return {
         "accuracy": accuracy,
-        "rain_predictions": rain_predictions.to_dict(orient='records')
+        "rain_predictions": rain_predictions
     }
 
 @app.get("/metrics")
