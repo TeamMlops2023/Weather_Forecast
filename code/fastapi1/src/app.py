@@ -72,7 +72,8 @@ def run_model():
 
     # Envoi des prédictions à Elasticsearch
     for prediction in rain_predictions:
-        es.index(index="rain_predictions", document=prediction)
+        response = es.index(index="rain_predictions", document=prediction)
+        logging.debug(f"Indexation response: {response}")
 
     # Retourne la précision et les prédictions de pluie au format JSON.
     return {
