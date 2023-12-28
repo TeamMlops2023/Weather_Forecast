@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        DOCKER_ID = "votre_docker_id" // Remplacez par votre ID Docker
+        DOCKER_ID = "mlops_weather" // Remplacez par votre ID Docker
         DOCKER_IMAGE = "fastapi-app" // Nom de l'image pour le service FastAPI
         DOCKER_TAG = "v.${BUILD_ID}.0" // Tag basé sur l'ID de build
     }
