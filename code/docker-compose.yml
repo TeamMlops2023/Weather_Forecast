@@ -43,6 +43,13 @@ services:
     networks:
       - elastic
 
+ml-service:
+    build: ./chemin_vers_le_dossier_ml
+    ports:
+      - "5000:5000"
+    networks:
+      - elastic
+  
 networks:
   elastic:
     driver: bridge
