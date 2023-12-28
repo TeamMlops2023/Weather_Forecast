@@ -44,7 +44,7 @@ services:
       - elastic
 
   ml-service:
-    build: ./Weather_Forecast/machine_learning
+    build: ./machine_learning
     ports:
       - "5000:5000"
     networks:
