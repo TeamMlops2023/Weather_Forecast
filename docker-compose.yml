@@ -43,13 +43,13 @@ services:
     networks:
       - elastic
 
-ml-service:
+  ml-service:
     build: ./Weather_Forecast/machine_learning
     ports:
       - "5000:5000"
     networks:
       - elastic
-  
+
 networks:
   elastic:
     driver: bridge
