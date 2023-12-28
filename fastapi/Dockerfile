@@ -1,18 +1,18 @@
-# Utilisez l'image de base Python officielle
-FROM python:3.8
+# Utilisez une image Python officielle
+FROM python:3.8-slim
 
-# Définissez le répertoire de travail dans le conteneur
-WORKDIR /usr/src/app
+# Définissez le répertoire de travail
+WORKDIR /app
 
-# Copiez les fichiers nécessaires dans le conteneur
-COPY src/ .
-COPY data/ data/
-
-# Installez les dépendances
+# Copiez les fichiers de dépendances et installez-les
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exposez le port sur lequel l'application va s'exécuter
-EXPOSE 8000
+# Copiez le code source de votre application FastAPI
+COPY main.py .
 
-# Commande pour démarrer l'application en utilisant uvicorn
-CMD ["python", "/usr/src/app/start_server.py"]
+# Exposez le port utilisé par FastAPI
+EXPOSE 80
+
+# Commande pour lancer l'application FastAPI
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
