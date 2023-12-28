@@ -44,7 +44,7 @@ services:
       - elastic
 
 ml-service:
-    build: ./chemin_vers_le_dossier_ml
+    build: ./Weather_Forecast/machine_learning
     ports:
       - "5000:5000"
     networks:
