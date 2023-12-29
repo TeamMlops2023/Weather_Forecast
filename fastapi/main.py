@@ -1,16 +1,15 @@
-from fastapi import FastAPI
 import requests
+from fastapi import FastAPI
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"Hello": "FastAPI Service"}
+
 @app.get("/run_model")
 def run_model(date: str, city: str):
-    # Préparer les données pour le modèle ML
-    data = {
-        "date": date,
-        "city": city
-    }
-
-    # Envoyer les données au service ML et obtenir la réponse
-    response = requests.post("http://ml-service:5000/predict", json=data)
+    # Interagir avec le service de Machine Learning
+    ml_service_url = "http://ml-service:5000/predict"
+    response = requests.post(ml_service_url, json={"date": date, "city": city})
     return response.json()
