@@ -1,12 +1,18 @@
-# fastapi/Dockerfile
+# Utilisez une image de base appropriée pour Python
 FROM python:3.8-slim
 
+# Créez un répertoire de travail
 WORKDIR /app
 
-COPY requirements.txt .
+# Copiez le code de l'application dans le répertoire de travail
+COPY . /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Installez les dépendances Python
+RUN pip install -r requirements.txt
 
-COPY main.py .
+# Exposez le port sur lequel FastAPI s'exécute
+EXPOSE 8000
 
+# Commande pour lancer FastAPI
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
