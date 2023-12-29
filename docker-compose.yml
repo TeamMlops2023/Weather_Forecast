@@ -6,6 +6,6 @@ services:
       - "8000:8000"
 
   ml-service:
-    build: ./machine_learning
+    build: ./ml_service
     ports:
       - "5000:5000"
