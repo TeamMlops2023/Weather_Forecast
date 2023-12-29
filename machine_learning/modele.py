@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
+model = joblib.load('model.joblib')
 
 def load_and_train_model():
     df = pd.read_csv('data/data_features_with_location.csv', index_col=0)
