@@ -1,20 +1,11 @@
 version: '3'
-
 services:
   fastapi:
     build: ./fastapi
     ports:
       - "8000:8000"
-    networks:
-      - elastic
 
   ml-service:
     build: ./machine_learning
     ports:
       - "5000:5000"
-    networks:
-      - elastic
-
-networks:
-  elastic:
-    driver: bridge
