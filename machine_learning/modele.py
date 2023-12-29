@@ -1,25 +1,34 @@
 from flask import Flask, request, jsonify
 import joblib
-import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
 
 # Charger le modèle pré-entraîné
-model = joblib.load('model.joblib')
+model, le = joblib.load('model_with_encoder.joblib')
 
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json(force=True)
-    # Adaptez ces lignes pour correspondre aux caractéristiques attendues par votre modèle
-    date = data.get('date')
-    city = data.get('city')
+    date = data['date']
+    city = data['city']
 
-    # Vous devez transformer 'date' et 'city' en un format numérique que votre modèle peut comprendre.
-    # Ceci est juste un exemple. Vous devrez adapter cela en fonction de la façon dont votre modèle a été formé.
-    model_input = [np.array([date, city])]
+    # Convertir la date en format datetime
+    date = pd.to_datetime(date, format='%Y-%m-%d')
 
+    # Préparer les données pour le modèle
+    # (Cela doit correspondre à la manière dont vous avez formé votre modèle)
+    model_input = pd.DataFrame({
+        'year': [date.year],
+        'month': [date.month],
+        'day': [date.day],
+        'location_encoded': le.transform([city])
+    })
+
+    # Faire la prédiction
     prediction = model.predict(model_input)
-    return jsonify({"result": prediction.tolist()})  # Convertit le résultat en liste pour la sérialisation JSON
+    return jsonify({"prediction": int(prediction[0])})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
