@@ -10,12 +10,6 @@ services:
     ports:
       - "3306:3306"
 
-  data-loader:
-    build:
-      context: ./data_loader
-    depends_on:
-      - mysql
-
   fastapi:
     build:
       context: ./fastapi
