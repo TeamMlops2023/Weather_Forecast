@@ -24,11 +24,27 @@ model, le = load_and_train_model()
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    # Récupérer les données de la requête POST
     data = request.get_json(force=True)
-    # Effectuer la prédiction ici
+    
+    # Traitement des données (ex: conversion des dates et des villes en caractéristiques numériques)
     # ...
-    # Construire et renvoyer la réponse
-    return jsonify({})
+    # Vous devrez adapter cette partie en fonction de la manière dont votre modèle s'attend à recevoir les données
+    date = pd.to_datetime(data["date"])
+    city = le.transform([data["city"]])
+    model_input = ...  # Créez ici le format d'entrée attendu par votre modèle
+
+    # Effectuer la prédiction
+    prediction = model.predict(model_input)
+
+    # Créer la réponse
+    response = {
+        "Date": data["date"],
+        "City": data["city"],
+        "Predicted": int(prediction[0])  # Convertir la prédiction en un format approprié
+    }
+
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
