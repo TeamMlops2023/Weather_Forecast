@@ -3,7 +3,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import joblib
-import os
 
 # Charger les données
 df = pd.read_csv('data/data_features_with_location.csv')
@@ -24,9 +23,5 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
-# Définir le chemin pour sauvegarder le modèle
-# Cela enregistre le fichier .joblib dans le répertoire parent 'Weather_Forecast'
-model_path = os.path.join('..', 'model.joblib')
-
-# Sauvegarde du modèle
-joblib.dump(model, model_path)
+# Sauvegarde du modèle dans le répertoire actuel
+joblib.dump(model, 'model.joblib')
