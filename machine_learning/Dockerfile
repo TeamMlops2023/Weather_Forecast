@@ -5,5 +5,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY modele.py .
 COPY data/ data/
-COPY model.joblib .  # Copiez le fichier .joblib dans le conteneur
+COPY ../model.joblib .  # Copiez le fichier .joblib depuis le répertoire parent
 CMD ["python", "modele.py"]
