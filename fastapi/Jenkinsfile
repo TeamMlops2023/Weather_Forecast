@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Définir les variables
-                    def DOCKER_ID = "votre-docker-id"
+                    def DOCKER_ID = "mlops_2023"
                     def DOCKER_IMAGE = "weather_forecast-fastapi"
                     def DOCKER_TAG = "${BUILD_ID}.0"
 
