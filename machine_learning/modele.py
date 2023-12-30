@@ -6,26 +6,32 @@ import joblib
 import os
 import mysql.connector
 from mysql.connector import Error
+import time
 
-try:
-    # Connexion à la base de données
-    db = mysql.connector.connect(
-        host="mysql",
-        user="root",
-        password="mysecretpassword",
-        database="mlops_weather"
-    )
+# Paramètres de réessai de connexion
+max_attempts = 5
+attempt_count = 0
 
-    cursor = db.cursor()
-    # Votre logique de prédiction et d'insertion ici
+while attempt_count < max_attempts:
+    try:
+        # Connexion à la base de données
+        db = mysql.connector.connect(
+            host="mysql",
+            user="root",
+            password="mysecretpassword",
+            database="mlops_weather"
+        )
+        print("Connecté à MySQL")
+        cursor = db.cursor()
+        break
+    except Error as e:
+        print(f"Erreur lors de la connexion à MySQL: {e}")
+        attempt_count += 1
+        time.sleep(5)  # Attendre 5 secondes avant de réessayer
 
-except Error as e:
-    print(f"Erreur lors de la connexion à MySQL: {e}")
-finally:
-    if db.is_connected():
-        cursor.close()
-        db.close()
-        print("La connexion MySQL est fermée")
+if attempt_count == max_attempts:
+    print("Échec de la connexion à MySQL après plusieurs tentatives")
+    exit(1)
 
 # Chemin vers le fichier de données
 chemin_fichier_donnees = os.path.join('data', 'data_features_with_location.csv')
@@ -56,7 +62,7 @@ predictions = model.predict(X_test)
 for i in range(len(predictions)):
     date = df.iloc[i]['date']
     city = df.iloc[i]['location']
-    predicted = predictions[i].item()
+    predicted = predictions[i].item()  # Convertit numpy.int64 en int
     accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
     insert_query = "INSERT INTO model_predictions (Date, City, Predicted, Accuracy) VALUES (%s, %s, %s, %s)"
     cursor.execute(insert_query, (date, city, predicted, accuracy))
@@ -65,6 +71,7 @@ for i in range(len(predictions)):
 db.commit()
 
 # Fermeture de la connexion à la base de données
+cursor.close()
 db.close()
 
 # Affichage des prédictions
