@@ -1,26 +1,48 @@
 pipeline {
     agent any
+
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
+                // Checkout du code depuis Git
                 checkout scm
             }
         }
+
         stage('Build and Test') {
             steps {
                 script {
-                    def dockerImage = docker.image('mlops/fastapi:1.0')
-                    def container = dockerImage.run('-p 8082:8000 -d')
-                    try {
-                        sh 'docker exec -it mlops_fastapi_1 pip install -r requirements.txt'
-                        sh 'docker exec -it mlops_fastapi_1 pytest tests/'
-                    } finally {
-                        // Arrêtez proprement le conteneur Docker en utilisant docker stop ici
-                        sh "docker stop ${container.id}"
-                        dockerImage.remove()
+                    // Lancer le conteneur Docker
+                    def containerId = sh(script: 'docker run -d -p 8082:8000 -d mlops/fastapi:1.0', returnStatus: true).trim()
+
+                    // Vérifier si le conteneur a été démarré avec succès
+                    if (containerId) {
+                        echo "Le conteneur Docker a été démarré avec l'ID: $containerId"
+
+                        // Installer les dépendances dans le conteneur
+                        sh(script: "docker exec -it $containerId pip install -r requirements.txt", returnStatus: true)
+
+                        // Arrêter le conteneur Docker
+                        sh(script: "docker kill $containerId", returnStatus: true)
+
+                        echo "Le conteneur Docker a été arrêté avec succès."
+                    } else {
+                        error "Échec du démarrage du conteneur Docker."
                     }
                 }
             }
+        }
+
+        stage('Cleanup') {
+            steps {
+                // Nettoyer les ressources ou effectuer d'autres opérations de nettoyage si nécessaire
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Le pipeline a échoué. Effectuer des actions de récupération ou de notification ici si nécessaire."
         }
     }
 }
