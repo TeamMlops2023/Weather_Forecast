@@ -8,6 +8,9 @@ import mysql.connector
 from mysql.connector import Error
 import time
 
+# Pause pendant 2 minutes (120 secondes)
+time.sleep(120)
+
 # Paramètres de réessai de connexion
 max_attempts = 5
 attempt_count = 0
