@@ -1,50 +1,53 @@
 pipeline {
-    environment { 
-        DOCKER_ID = "mlops_weather"
-        DOCKER_IMAGE = "teamlopsapi"
-        DOCKER_TAG = "v.${BUILD_ID}.0"
-    }
-    agent any 
+    agent any
+    
     stages {
-        stage('Declarative: Checkout SCM') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
+        
         stage('Docker Build') {
             steps {
-                script {
-                    sh '''
-                    cd fastapi
-                    docker build -t $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG .
-                    '''
+                dir('fastapi') {
+                    script {
+                        docker.build("mlops_weather/teamlopsapi:v.30.0")
+                    }
                 }
             }
         }
+        
         stage('Docker Run') {
             steps {
-                script {
-                    sh '''
-                    cd fastapi
-                    docker-compose up -d
-                    sleep 10
-                    '''
+                dir('fastapi') {
+                    script {
+                        docker.withRegistry('https://your-docker-registry/', 'your-docker-credentials') {
+                            sh 'docker-compose up -d'
+                            sleep(10)
+                        }
+                    }
                 }
             }
         }
+        
         stage('Test Acceptance') {
             steps {
                 script {
-                    sh '''
-                    fastapi_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mlops_2023_fastapi_fastapi_1)
-                    response=$(curl -s -o /dev/null -w "%{http_code}" $fastapi_ip:8000)
-                    if [ "$response" = "200" ]; then
-                        echo "Tout fonctionne parfaitement"
-                    else
-                        echo "Le test a échoué avec le code de réponse: $response"
-                        exit 1
-                    fi
-                    '''
+                    def containerId = sh(script: 'docker ps -qf name=mlops_2023_fastapi_fastapi_1', returnStatus: false).trim()
+                    if (containerId) {
+                        def fastapi_ip = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $containerId", returnStdout: true).trim()
+                        def response = sh(script: "curl -s -o /dev/null -w %{http_code} $fastapi_ip:8000", returnStatus: true).trim()
+                        
+                        if (response == "200") {
+                            echo "Tout fonctionne parfaitement"
+                        } else {
+                            echo "Le test a échoué avec le code de réponse: $response"
+                            error "Test de l'acceptation échoué"
+                        }
+                    } else {
+                        error "Conteneur Docker FastAPI introuvable"
+                    }
                 }
             }
         }
