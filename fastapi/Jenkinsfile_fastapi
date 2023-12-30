@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     def dockerImage = docker.image('mlops/fastapi:1.0')
-                    def container = dockerImage.run('-p 8081:8000 -d')
+                    def container = dockerImage.run('-p 8082:8000 -d')
                     try {
                         sh 'docker exec -it mlops_fastapi_1 pip install -r requirements.txt'
                         sh 'docker exec -it mlops_fastapi_1 pytest tests/'
