@@ -34,10 +34,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        failure {
-            mail to: 'projet.mlops.weather@gmail.com', subject: 'Échec de la construction et des tests', body: 'La construction ou les tests ont échoué.'
-        }
-    }
 }
