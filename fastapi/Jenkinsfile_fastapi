@@ -10,12 +10,13 @@ pipeline {
             steps {
                 script {
                     def dockerImage = docker.image('mlops/fastapi:1.0')
-                    dockerImage.run('-p 8081:8000 -d') // Modification du port ici
+                    def container = dockerImage.run('-p 8081:8000 -d')
                     try {
                         sh 'docker exec -it mlops_fastapi_1 pip install -r requirements.txt'
                         sh 'docker exec -it mlops_fastapi_1 pytest tests/'
                     } finally {
-                        dockerImage.stop()
+                        // Arrêtez proprement le conteneur Docker en utilisant docker stop ici
+                        sh "docker stop ${container.id}"
                         dockerImage.remove()
                     }
                 }
