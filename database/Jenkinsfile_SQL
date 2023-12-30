@@ -36,7 +36,7 @@ pipeline {
                 script {
                     // Run the model inside a Docker container and link it to the MySQL container
                     docker.image('modele-image')
-                        .withRun('-d --rm --link mysql-container:mysql')
+                        .withRun('-d --rm --link mysql-container:mysql modele-image')
                 }
             }
         }
