@@ -1,0 +1,21 @@
+pipeline {
+    agent any // Utilisez n'importe quel agent disponible
+
+    stages {
+        stage('Start Database') {
+            steps {
+                script {
+                    // Démarrez le conteneur Docker pour la base de données
+                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 mysql:5.7'
+                    echo 'Lancement du conteneur de la base de données réussi.'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+        }
+    }
+}
