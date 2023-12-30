@@ -11,35 +11,10 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                script {
-                    // Démarrer le conteneur Docker
-                    def containerId = sh(script: 'docker run -d -p 8082:8000 -d mlops/fastapi:1.0', returnStatus: true).trim()
-
-                    // Vérifier si le conteneur a été démarré avec succès
-                    if (containerId) {
-                        echo "Le conteneur Docker a été démarré avec l'ID: $containerId"
-
-                        // Installer les dépendances dans le conteneur
-                        sh(script: "docker exec -it $containerId pip install -r requirements.txt", returnStatus: true)
-
-                        // Exécuter des tests ou d'autres étapes de construction
-                        // Vous pouvez ajouter des étapes supplémentaires ici en fonction de vos besoins
-
-                        // Arrêter le conteneur Docker
-                        sh(script: "docker stop $containerId", returnStatus: true)
-
-                        echo "Le conteneur Docker a été arrêté avec succès."
-                    } else {
-                        error "Échec du démarrage du conteneur Docker."
-                    }
-                }
+                // Insérez ici les étapes spécifiques de construction et de test de votre application.
+                // Vous pouvez utiliser des commandes shell, exécuter des scripts, etc.
+                // Assurez-vous d'ajouter vos propres commandes pour construire et tester votre application.
             }
-        }
-    }
-
-    post {
-        always {
-            // Nettoyer les ressources ou effectuer d'autres opérations nécessaires
         }
     }
 }
