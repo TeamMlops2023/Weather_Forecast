@@ -9,13 +9,14 @@ pipeline {
         stage('Build and Test') {
             steps {
                 script {
-                    docker.image('mlops/fastapi:1.0').run('-p 8000:8000 -d')
+                    def dockerImage = docker.image('mlops/fastapi:1.0')
+                    dockerImage.run('-p 8000:8000 -d')
                     try {
-                        sh 'pip install -r requirements.txt'
-                        sh 'pytest tests/'
+                        sh 'docker exec -it mlops_fastapi_1 pip install -r requirements.txt'
+                        sh 'docker exec -it mlops_fastapi_1 pytest tests/'
                     } finally {
-                        docker.image('mlops/fastapi:1.0').stop()
-                        docker.image('mlops/fastapi:1.0').remove()
+                        dockerImage.stop()
+                        dockerImage.remove()
                     }
                 }
             }
