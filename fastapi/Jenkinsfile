@@ -1,15 +1,16 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_ID = "mlops_2023"
+        DOCKER_IMAGE = "weather_forecast-fastapi"
+        DOCKER_TAG = "${BUILD_ID}.0"
+    }
+
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Définir les variables
-                    def DOCKER_ID = "mlops_2023"
-                    def DOCKER_IMAGE = "weather_forecast-fastapi"
-                    def DOCKER_TAG = "${BUILD_ID}.0"
-
                     // Étape de construction de l'image Docker
                     sh "docker build -t ${DOCKER_ID}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
