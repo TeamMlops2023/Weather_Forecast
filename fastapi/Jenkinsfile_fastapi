@@ -35,8 +35,9 @@ pipeline {
         stage('Test Acceptance') {
             steps {
                 script {
-                    sh '''
-                    response=$(curl -s -o /dev/null -w "%{http_code}" localhost:8000)
+                    # Obtenir l'adresse IP du conteneur FastAPI
+                    fastapi_ip=$(docker inspect -f '{{range .NetworkSettings.Networks.mon-reseau-docker.IPAddress}}' mlops_2023_fastapi_fastapi_1)
+                    response=$(curl -s -o /dev/null -w "%{http_code}" $fastapi_ip:8000)
                     if [ "$response" = "200" ]; then
                         echo "Tout fonctionne parfaitement"
                     else
@@ -49,3 +50,4 @@ pipeline {
         }
     }
 }
+
