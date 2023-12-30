@@ -35,9 +35,8 @@ pipeline {
         stage('Test Acceptance') {
             steps {
                 script {
-                    /*
-                    Obtenir l'adresse IP du conteneur FastAPI
-                    */
+                    // Exécutez un script shell dans un fichier temporaire
+                    writeFile file: 'test.sh', text: '''
                     fastapi_ip=$(docker inspect -f '{{range .NetworkSettings.Networks.mon-reseau-docker.IPAddress}}' mlops_2023_fastapi_fastapi_1)
                     response=$(curl -s -o /dev/null -w "%{http_code}" $fastapi_ip:8000)
                     if [ "$response" = "200" ]; then
@@ -46,6 +45,9 @@ pipeline {
                         echo "Le test a échoué avec le code de réponse: $response"
                         exit 1
                     fi
+                    '''
+                    // Exécutez le script shell temporaire
+                    sh 'bash test.sh'
                 }
             }
         }
