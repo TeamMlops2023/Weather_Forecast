@@ -9,6 +9,15 @@ pipeline {
                 }
             }
         }
+        stage('Stop and Remove Existing Container') {
+            steps {
+                script {
+                    // Stop and remove the existing container if it exists
+                    sh "docker stop mon-container || true"
+                    sh "docker rm mon-container || true"
+                }
+            }
+        }
         stage('Run FastAPI Container') {
             steps {
                 script {
