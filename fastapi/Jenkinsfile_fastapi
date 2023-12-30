@@ -1,52 +1,21 @@
 pipeline {
     agent any
-    
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Docker Build') {
-            steps {
-                dir('fastapi') {
-                    script {
-                        docker.build("mlops_weather/teamlopsapi:v.30.0")
-                    }
-                }
-            }
-        }
-        
-        stage('Docker Run') {
-            steps {
-                dir('fastapi') {
-                    script {
-                        docker.withRegistry('https://your-docker-registry/', 'your-docker-credentials') {
-                            sh 'docker-compose up -d'
-                            sleep(10)
-                        }
-                    }
-                }
-            }
-        }
-        
-        stage('Test Acceptance') {
+        stage('Build and Test') {
             steps {
                 script {
-                    def containerId = sh(script: 'docker ps -qf name=mlops_2023_fastapi_fastapi_1', returnStatus: false).trim()
-                    if (containerId) {
-                        def fastapi_ip = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $containerId", returnStdout: true).trim()
-                        def response = sh(script: "curl -s -o /dev/null -w %{http_code} $fastapi_ip:8000", returnStatus: true).trim()
-                        
-                        if (response == "200") {
-                            echo "Tout fonctionne parfaitement"
-                        } else {
-                            echo "Le test a échoué avec le code de réponse: $response"
-                            error "Test de l'acceptation échoué"
-                        }
-                    } else {
-                        error "Conteneur Docker FastAPI introuvable"
+                    docker.image('mlops/fastapi:1.0').run('-p 8000:8000 -d')
+                    try {
+                        sh 'pip install -r requirements.txt'
+                        sh 'pytest tests/'
+                    } finally {
+                        docker.image('mlops/fastapi:1.0').stop()
+                        docker.image('mlops/fastapi:1.0').remove()
                     }
                 }
             }
