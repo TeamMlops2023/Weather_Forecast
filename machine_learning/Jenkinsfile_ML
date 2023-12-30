@@ -2,44 +2,21 @@ pipeline {
     agent any // Utilisez n'importe quel agent disponible
 
     stages {
-        stage('Build') { // Construction de l'image Docker
+        stage('Build') {
             steps {
                 script {
-                    // Construit l'image Docker à partir du Dockerfile dans le répertoire courant
+                    // Construisez l'image Docker du modèle de machine learning
                     sh 'docker build -t modele-image .'
                     echo 'Construction de l\'image Docker réussie.'
                 }
             }
         }
-        stage('Run') { // Étape de lancement du script de machine learning
+        stage('Run Model and Populate Database') {
             steps {
                 script {
-                    // Démarre le conteneur Docker pour exécuter le script modele.py
-                    sh 'docker run -d --name modele-container modele-image'
-                    echo 'Lancement du conteneur réussi.'
-                }
-            }
-        }
-        stage('Test') { // Étape de test du modèle
-            steps {
-                script {
-                    // Attend 10 secondes pour donner le temps au script de s'exécuter
-                    sh 'sleep 10'
-                    echo 'Début des tests.'
-                    // Ici, ajoutez les commandes pour tester la sortie de votre modèle
-                    // Par exemple, vérifier si le fichier de sortie attendu est généré
-                    // Exemple : sh 'docker exec modele-container ls /app/output | grep "resultats.csv" && echo "Test de sortie réussi." || echo "Test de sortie échoué."'
-                }
-            }
-        }
-        stage('Cleanup') { // Étape de nettoyage des ressources
-            steps {
-                script {
-                    // Arrête le conteneur modele-container s'il est en cours d'exécution
-                    sh 'docker stop modele-container || true'
-                    // Supprime le conteneur modele-container
-                    sh 'docker rm modele-container || true'
-                    echo 'Arrêt et nettoyage du conteneur réussi.'
+                    // Démarrez le conteneur Docker pour exécuter le modèle et remplir la base de données
+                    sh 'docker run -it --rm --link mysql-container:mysql modele-image'
+                    echo 'Exécution du modèle et remplissage de la base de données terminés.'
                 }
             }
         }
