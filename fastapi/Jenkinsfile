@@ -1,46 +1,51 @@
 pipeline {
-    agent any
+    environment { 
+        DOCKER_ID = "mkops_weather"
+        DOCKER_IMAGE = "teammlopsapi"
+        DOCKER_TAG = "v.${BUILD_ID}.0"
+    }
+    agent any 
     stages {
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
                 script {
-                    // Build your Docker image here
-                    sh "docker build -t mlops_2023/weather_forecast-fastapi:10.0 ."
+                    sh '''
+                    docker build -t $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG .
+                    '''
                 }
             }
         }
-        stage('Stop and Remove Existing Container') {
+        stage('Docker Run') {
             steps {
                 script {
-                    // Stop and remove the existing container if it exists
-                    sh "docker stop mon-container || true"
-                    sh "docker rm mon-container || true"
+                    sh '''
+                    docker run -d -p 8000:8000 --name fastapi-test $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+                    sleep 10
+                    '''
                 }
             }
         }
-        stage('Run FastAPI Container') {
+        stage('Test Acceptance') {
             steps {
                 script {
-                    // Run the FastAPI container
-                    sh "docker run -d -p 8000:8000 --name mon-container mlops_2023/weather_forecast-fastapi:10.0"
+                    sh '''
+                    response=$(curl -s -o /dev/null -w "%{http_code}" localhost:8000)
+                    if [ "$response" = "200" ]; then
+                        echo "Tout fonctionne parfaitement"
+                    else
+                        echo "Le test a échoué avec le code de réponse: $response"
+                        exit 1
+                    fi
+                    '''
                 }
             }
         }
-        stage('Wait for FastAPI to Start') {
-            steps {
-                script {
-                    // Wait for FastAPI to be up and running
-                    def maxRetries = 30
-                    def retries = 0
-                    def fastApiContainerIp = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mon-container", returnStdout: true).trim()
-                    def responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${fastApiContainerIp}:8000", returnStatus: true)
-                    if (responseCode == 200) {
-                        echo "FastAPI is up and running."
-                    } else {
-                        error "FastAPI did not start successfully."
-                    }
-                }
-            }
+    }
+    post {
+        failure {
+            mail to: "projet.mlops.weather@gmail.com",
+                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_ID} has failed",
+                 body: "Check out the console output at ${env.BUILD_URL} for more info on the pipeline failure."
         }
     }
 }
