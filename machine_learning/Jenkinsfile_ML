@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Assurez-vous d'être dans le répertoire contenant le Dockerfile
-                    dir('chemin/vers/votre/projet') {
+                    dir('/home/alain/Weather_Forecast/machine_learning') {
                         // Construisez l'image Docker du modèle de machine learning
                         sh 'docker build -t modele-image .'
                         echo 'Construction de l\'image Docker réussie.'
