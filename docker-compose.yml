@@ -8,7 +8,7 @@ services:
       MYSQL_USER: mlops
       MYSQL_PASSWORD: mlops
     ports:
-      - "3306:3306"
+      - "3307:3306"
 
   fastapi:
     build:
