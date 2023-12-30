@@ -1,7 +1,7 @@
 pipeline {
     environment { 
-        DOCKER_ID = "mkops_weather"
-        DOCKER_IMAGE = "teammlopsapi"
+        DOCKER_ID = "mlops_weather" // Remplacez par votre Docker ID
+        DOCKER_IMAGE = "teamlopsapi"
         DOCKER_TAG = "v.${BUILD_ID}.0"
     }
     agent any 
@@ -39,13 +39,6 @@ pipeline {
                     '''
                 }
             }
-        }
-    }
-    post {
-        failure {
-            mail to: "projet.mlops.weather@gmail.com",
-                 subject: "${env.JOB_NAME} - Build # ${env.BUILD_ID} has failed",
-                 body: "Check out the console output at ${env.BUILD_URL} for more info on the pipeline failure."
         }
     }
 }
