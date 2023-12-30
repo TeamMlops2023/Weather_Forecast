@@ -34,11 +34,6 @@ pipeline {
                     def retries = 0
                     def fastApiContainerIp = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mon-container", returnStdout: true).trim()
                     def responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${fastApiContainerIp}:8000", returnStatus: true)
-                    while (responseCode != 200 && retries < maxRetries) {
-                        sleep time: 10, unit: 'SECONDS'
-                        responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${fastApiContainerIp}:8000", returnStatus: true)
-                        retries++
-                    }
                     if (responseCode == 200) {
                         echo "FastAPI is up and running."
                     } else {
