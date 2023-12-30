@@ -1,40 +1,47 @@
 pipeline {
-    agent any
+    agent any // Définit que le pipeline peut s'exécuter sur n'importe quel agent disponible
 
     stages {
-        stage('Build') {
+        stage('Build') { // Construction de l'image Docker
             steps {
                 script {
+                    // Construit l'image Docker à partir du répertoire 'fastapi'
                     sh 'docker build -t fastapi-image ./fastapi'
                     echo 'Construction de l\'image Docker réussie.'
                 }
             }
         }
-        stage('Run') {
+        stage('Run') { // Étape de lancement de l'application FastAPI
             steps {
                 script {
+                    // Démarre le conteneur Docker port 8000
                     sh 'docker run -d --name fastapi-container -p 8000:8000 fastapi-image'
                     echo 'Lancement du conteneur réussi.'
                 }
             }
         }
-        stage('Test') {
+        stage('Test') { // Étape de test de l'application FastAPI
             steps {
                 script {
+                    // Attend 10 secondes pour donner le temps au serveur FastAPI de démarrer
                     sh 'sleep 10'
                     echo 'Début des tests des endpoints.'
+                    // Tests des differntes endpoint sur l'adresse ip du container fastapi
                     sh 'curl -s http://172.17.0.4:8000/ | grep "Hello World" && echo "Test de l\'endpoint racine réussi." || echo "Test de l\'endpoint racine échoué."'
                     sh 'curl -s http://172.17.0.4:8000/status | grep "ok" && echo "Test de l\'endpoint /status réussi." || echo "Test de l\'endpoint /status échoué."'
                     sh 'curl -s "http://172.17.0.4:8000/echo?text=HelloJenkins" | grep "HelloJenkins" && echo "Test de l\'endpoint /echo réussi." || echo "Test de l\'endpoint /echo échoué."'
                 }
             }
         }
-        stage('Cleanup') {
+        stage('Cleanup') { // Étape de nettoyage des ressources
             steps {
                 script {
+                    // Arrête le conteneur FastAPI s'il est en cours d'exécution
                     sh 'docker stop fastapi-container || true'
+                    // Supprime le conteneur FastAPI
                     sh 'docker rm fastapi-container || true'
-                    echo 'Nettoyage du conteneur réussi.'
+                    // Affiche un message de succès après l'arrêt et le nettoyage
+                    echo 'Arrêt et nettoyage du conteneur réussi.'
                 }
             }
         }
@@ -42,7 +49,9 @@ pipeline {
 
     post {
         always {
+            // Affiche un message à la fin de l'exécution du pipeline, quelle que soit l'issue
             echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
+
