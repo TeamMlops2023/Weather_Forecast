@@ -2,15 +2,19 @@ pipeline {
     agent any // Utilisez n'importe quel agent disponible
 
     stages {
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Construisez l'image Docker du modèle de machine learning
-                    sh 'docker build -t modele-image .'
-                    echo 'Construction de l\'image Docker réussie.'
+                    // Assurez-vous d'être dans le répertoire contenant le Dockerfile
+                    dir('chemin/vers/votre/projet') {
+                        // Construisez l'image Docker du modèle de machine learning
+                        sh 'docker build -t modele-image .'
+                        echo 'Construction de l\'image Docker réussie.'
+                    }
                 }
             }
         }
+    }
 
     post {
         always {
