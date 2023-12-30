@@ -21,27 +21,23 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Attendez un peu pour que le serveur démarre
                     sh 'sleep 10'
                     echo 'Début des tests des endpoints.'
-
-                    // Utilisez l'adresse IP obtenue précédemment pour les tests
                     sh 'curl -s http://172.17.0.4:8000/ | grep "Hello World" && echo "Test de l\'endpoint racine réussi." || echo "Test de l\'endpoint racine échoué."'
                     sh 'curl -s http://172.17.0.4:8000/status | grep "ok" && echo "Test de l\'endpoint /status réussi." || echo "Test de l\'endpoint /status échoué."'
                     sh 'curl -s "http://172.17.0.4:8000/echo?text=HelloJenkins" | grep "HelloJenkins" && echo "Test de l\'endpoint /echo réussi." || echo "Test de l\'endpoint /echo échoué."'
                 }
             }
         }
-        // La stage de Cleanup est désactivée pour le débogage
-        // stage('Cleanup') {
-        //     steps {
-        //         script {
-        //             sh 'docker stop fastapi-container || true'
-        //             sh 'docker rm fastapi-container || true'
-        //             echo 'Nettoyage du conteneur réussi.'
-        //         }
-        //     }
-        // }
+        stage('Cleanup') {
+            steps {
+                script {
+                    sh 'docker stop fastapi-container || true'
+                    sh 'docker rm fastapi-container || true'
+                    echo 'Nettoyage du conteneur réussi.'
+                }
+            }
+        }
     }
 
     post {
