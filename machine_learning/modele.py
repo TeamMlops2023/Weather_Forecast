@@ -56,7 +56,7 @@ predictions = model.predict(X_test)
 for i in range(len(predictions)):
     date = df.iloc[i]['date']
     city = df.iloc[i]['location']
-    predicted = predictions[i]
+    predicted = predictions[i].item()
     accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
     insert_query = "INSERT INTO model_predictions (Date, City, Predicted, Accuracy) VALUES (%s, %s, %s, %s)"
     cursor.execute(insert_query, (date, city, predicted, accuracy))
