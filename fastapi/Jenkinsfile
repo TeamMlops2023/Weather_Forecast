@@ -1,38 +1,40 @@
 pipeline {
     agent any
-
-    environment {
-        DOCKER_ID = "mlops_2023"
-        DOCKER_IMAGE = "weather_forecast-fastapi"
-        DOCKER_TAG = "${BUILD_ID}.0"
-    }
-
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Étape de construction de l'image Docker
-                    sh "docker build -t ${DOCKER_ID}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    // Build your Docker image here
+                    sh "docker build -t mlops_2023/weather_forecast-fastapi:10.0 ."
                 }
             }
         }
-
-        stage('Run Docker Container') {
+        stage('Run FastAPI Container') {
             steps {
                 script {
-                    // Étape d'exécution du conteneur Docker
-                    sh "docker stop mon-container || true" // Arrête le conteneur s'il est en cours d'exécution
-                    sh "docker rm mon-container || true"   // Supprime le conteneur s'il existe
-                    sh "docker run -d -p 8000:8000 --name mon-container ${DOCKER_ID}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    // Run the FastAPI container
+                    sh "docker run -d -p 8000:8000 --name mon-container mlops_2023/weather_forecast-fastapi:10.0"
                 }
             }
         }
-
-        stage('Test FastAPI') {
+        stage('Wait for FastAPI to Start') {
             steps {
                 script {
-                    // Étape de test FastAPI (personnalisez ici pour vos tests)
-                    sh "curl http://localhost:8000" // Utilisez le port 8000 pour accéder à FastAPI
+                    // Wait for FastAPI to be up and running
+                    def maxRetries = 30
+                    def retries = 0
+                    def fastApiContainerIp = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mon-container", returnStdout: true).trim()
+                    def responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${fastApiContainerIp}:8000", returnStatus: true)
+                    while (responseCode != 200 && retries < maxRetries) {
+                        sleep time: 10, unit: 'SECONDS'
+                        responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${fastApiContainerIp}:8000", returnStatus: true)
+                        retries++
+                    }
+                    if (responseCode == 200) {
+                        echo "FastAPI is up and running."
+                    } else {
+                        error "FastAPI did not start successfully."
+                    }
                 }
             }
         }
