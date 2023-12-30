@@ -11,7 +11,7 @@ db = mysql.connector.connect(
     host="mysql",
     user="root",
     password="mysecretpassword",
-    database="weather_forecast"
+    database="mlops_weather"
 )
 
 # Créez un curseur pour exécuter des requêtes SQL
