@@ -21,34 +21,29 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Attendez un peu pour que le serveur démarre
-                    sh 'sleep 10'
-
-                    // Test de l'endpoint racine
-                    sh 'curl -s http://localhost:8000/ | grep "Hello World" && echo "Test de l\'endpoint racine réussi." || echo "Test de l\'endpoint racine échoué."'
-
-                    // Test de l'endpoint /status
-                    sh 'curl -s http://localhost:8000/status | grep "ok" && echo "Test de l\'endpoint /status réussi." || echo "Test de l\'endpoint /status échoué."'
-
-                    // Test de l'endpoint /echo
-                    sh 'curl -s "http://localhost:8000/echo?text=HelloJenkins" | grep "HelloJenkins" && echo "Test de l\'endpoint /echo réussi." || echo "Test de l\'endpoint /echo échoué."'
+                    sh 'sleep 10' // Attente pour que le serveur démarre
+                    echo 'Affichage des réponses des endpoints pour débogage :'
+                    sh 'curl -s http://localhost:8000/'
+                    sh 'curl -s http://localhost:8000/status'
+                    sh 'curl -s "http://localhost:8000/echo?text=HelloJenkins"'
                 }
             }
         }
-        stage('Cleanup') {
-            steps {
-                script {
-                    sh 'docker stop fastapi-container || true'
-                    sh 'docker rm fastapi-container || true'
-                    echo 'Nettoyage du conteneur réussi.'
-                }
-            }
-        }
+        // La stage de Cleanup est désactivée pour le débogage
+        // stage('Cleanup') {
+        //     steps {
+        //         script {
+        //             sh 'docker stop fastapi-container || true'
+        //             sh 'docker rm fastapi-container || true'
+        //             echo 'Nettoyage du conteneur réussi.'
+        //         }
+        //     }
+        // }
     }
 
     post {
-        success {
-            echo 'Tests réussis : Votre application FastAPI est fonctionnelle.'
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
