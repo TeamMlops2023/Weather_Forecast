@@ -21,11 +21,14 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh 'sleep 10' // Attente pour que le serveur démarre
-                    echo 'Affichage des réponses des endpoints pour débogage :'
-                    sh 'curl -s http://localhost:8000/'
-                    sh 'curl -s http://localhost:8000/status'
-                    sh 'curl -s "http://localhost:8000/echo?text=HelloJenkins"'
+                    // Attendez un peu pour que le serveur démarre
+                    sh 'sleep 10'
+                    echo 'Début des tests des endpoints.'
+
+                    // Utilisez l'adresse IP obtenue précédemment pour les tests
+                    sh 'curl -s http://172.17.0.4:8000/ | grep "Hello World" && echo "Test de l\'endpoint racine réussi." || echo "Test de l\'endpoint racine échoué."'
+                    sh 'curl -s http://172.17.0.4:8000/status | grep "ok" && echo "Test de l\'endpoint /status réussi." || echo "Test de l\'endpoint /status échoué."'
+                    sh 'curl -s "http://172.17.0.4:8000/echo?text=HelloJenkins" | grep "HelloJenkins" && echo "Test de l\'endpoint /echo réussi." || echo "Test de l\'endpoint /echo échoué."'
                 }
             }
         }
