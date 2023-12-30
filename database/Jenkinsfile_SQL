@@ -1,21 +1,55 @@
 pipeline {
-    agent any // Utilisez n'importe quel agent disponible
-
+    agent any
+    
     stages {
+        stage('Checkout SCM') {
+            steps {
+                // Checkout your source code from Git repository
+                checkout scm
+            }
+        }
+        
         stage('Start Database') {
             steps {
                 script {
-                    // Démarrez le conteneur Docker pour la base de données
-                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 mysql:5.7'
+                    // Start MySQL container
+                    docker.image('mysql:5.7')
+                        .withRun('-d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306')
+                        .start()
                     echo 'Lancement du conteneur de la base de données réussi.'
                 }
             }
         }
+        
+        stage('Build Model Image') {
+            steps {
+                script {
+                    // Build Docker image for your ML model
+                    docker.build('modele-image', '.')
+                    echo 'Construction de l\'image Docker réussie.'
+                }
+            }
+        }
+        
+        stage('Run Model and Populate Database') {
+            steps {
+                script {
+                    // Run the model inside a Docker container and link it to the MySQL container
+                    docker.image('modele-image')
+                        .withRun('-d --rm --link mysql-container:mysql')
+                }
+            }
+        }
     }
-
+    
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+            // Clean up Docker resources
+            script {
+                docker.image('mysql:5.7').stop()
+                docker.image('mysql:5.7').remove()
+                docker.image('modele-image').remove()
+            }
         }
     }
 }
