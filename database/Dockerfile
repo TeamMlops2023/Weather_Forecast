@@ -7,8 +7,5 @@ ENV MYSQL_DATABASE=mlops_weather
 ENV MYSQL_USER=mlops
 ENV MYSQL_PASSWORD=mlops
 
-# Copiez les fichiers SQL d'initialisation s'ils sont nécessaires
-COPY init.sql /docker-entrypoint-initdb.d/
-
 # Exposez le port MySQL (par défaut : 3306)
 EXPOSE 3306
