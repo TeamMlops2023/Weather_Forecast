@@ -21,6 +21,8 @@ pipeline {
             steps {
                 script {
                     // Étape d'exécution du conteneur Docker
+                    sh "docker stop mon-container || true" // Arrête le conteneur s'il est en cours d'exécution
+                    sh "docker rm mon-container || true"   // Supprime le conteneur s'il existe
                     sh "docker run -d -p 8000:8000 --name mon-container ${DOCKER_ID}/${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
@@ -30,7 +32,7 @@ pipeline {
             steps {
                 script {
                     // Étape de test FastAPI (personnalisez ici pour vos tests)
-                    sh "curl http://localhost"
+                    sh "curl http://localhost:8000" // Utilisez le port 8000 pour accéder à FastAPI
                 }
             }
         }
