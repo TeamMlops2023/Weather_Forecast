@@ -11,16 +11,6 @@ pipeline {
                 }
             }
         }
-        stage('Run Model and Populate Database') {
-            steps {
-                script {
-                    // Démarrez le conteneur Docker pour exécuter le modèle et remplir la base de données
-                    sh 'docker run -it --rm --link mysql-container:mysql modele-image'
-                    echo 'Exécution du modèle et remplissage de la base de données terminés.'
-                }
-            }
-        }
-    }
 
     post {
         always {
