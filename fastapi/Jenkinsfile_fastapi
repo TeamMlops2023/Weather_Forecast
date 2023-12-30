@@ -4,15 +4,15 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                // Checkout du code depuis Git
-                checkout scm
+                // Obtention du code depuis un référentiel Git
+                checkout([$class: 'GitSCM', branches: [[name: '*/BAS_ALAIN']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'your-git-credentials', url: 'https://github.com/TeamMlops2023/Weather_Forecast.git']]])
             }
         }
 
         stage('Build and Test') {
             steps {
                 script {
-                    // Lancer le conteneur Docker
+                    // Démarrer le conteneur Docker
                     def containerId = sh(script: 'docker run -d -p 8082:8000 -d mlops/fastapi:1.0', returnStatus: true).trim()
 
                     // Vérifier si le conteneur a été démarré avec succès
@@ -22,8 +22,11 @@ pipeline {
                         // Installer les dépendances dans le conteneur
                         sh(script: "docker exec -it $containerId pip install -r requirements.txt", returnStatus: true)
 
+                        // Exécuter des tests ou d'autres étapes de construction
+                        // Vous pouvez ajouter des étapes supplémentaires ici en fonction de vos besoins
+
                         // Arrêter le conteneur Docker
-                        sh(script: "docker kill $containerId", returnStatus: true)
+                        sh(script: "docker stop $containerId", returnStatus: true)
 
                         echo "Le conteneur Docker a été arrêté avec succès."
                     } else {
@@ -32,17 +35,11 @@ pipeline {
                 }
             }
         }
-
-        stage('Cleanup') {
-            steps {
-                // Nettoyer les ressources ou effectuer d'autres opérations de nettoyage si nécessaire
-            }
-        }
     }
 
     post {
-        failure {
-            echo "Le pipeline a échoué. Effectuer des actions de récupération ou de notification ici si nécessaire."
+        always {
+            // Nettoyer les ressources ou effectuer d'autres opérations nécessaires
         }
     }
 }
