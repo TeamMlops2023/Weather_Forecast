@@ -3,6 +3,7 @@ pipeline {
         DOCKER_ID = "mlops_weather"
         DOCKER_IMAGE = "teamlopsapi"
         DOCKER_TAG = "v.${BUILD_ID}.0"
+        PROJECT_DIRECTORY = "/home/alain/Weather_Forecast"  // Remplacez par le chemin absolu de votre projet
     }
     agent any 
     stages {
@@ -10,6 +11,7 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    cd $PROJECT_DIRECTORY
                     docker build -t $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG .
                     '''
                 }
@@ -19,9 +21,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker stop fastapi-test || true
-                    docker rm fastapi-test || true
-                    docker run -d -p 8000:8000 --name fastapi-test $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
+                    cd $PROJECT_DIRECTORY
+                    docker-compose up -d
                     sleep 10
                     '''
                 }
@@ -44,4 +45,3 @@ pipeline {
         }
     }
 }
-
