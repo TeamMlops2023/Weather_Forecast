@@ -19,8 +19,9 @@ services:
       - mysql
 
   machine-learning:
-    build:
-      context: ./machine_learning
-    depends_on:
-      - mysql
+  build:
+    context: ./machine_learning
+  depends_on:
+    - mysql
+  command: python modele.py
 
