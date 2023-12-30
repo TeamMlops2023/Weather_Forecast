@@ -4,18 +4,28 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import joblib
 import os
-import mysql.connector  # Importez le module MySQL
+import mysql.connector
+from mysql.connector import Error
 
-# Connexion à la base de données MySQL
-db = mysql.connector.connect(
-    host="mysql",
-    user="root",
-    password="mysecretpassword",
-    database="mlops_weather"
-)
+try:
+    # Connexion à la base de données
+    db = mysql.connector.connect(
+        host="mysql",
+        user="root",
+        password="mysecretpassword",
+        database="mlops_weather"
+    )
 
-# Créez un curseur pour exécuter des requêtes SQL
-cursor = db.cursor()
+    cursor = db.cursor()
+    # Votre logique de prédiction et d'insertion ici
+
+except Error as e:
+    print(f"Erreur lors de la connexion à MySQL: {e}")
+finally:
+    if db.is_connected():
+        cursor.close()
+        db.close()
+        print("La connexion MySQL est fermée")
 
 # Chemin vers le fichier de données
 chemin_fichier_donnees = os.path.join('data', 'data_features_with_location.csv')
