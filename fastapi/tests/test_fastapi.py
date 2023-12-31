@@ -10,7 +10,7 @@ class TestFastAPIEndpoints(unittest.TestCase):
     def test_root_endpoint(self):
         response = requests.get(f"{self.base_url}/")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Hello World", response.text)
+        self.assertIn('"Hello" : "World"', response.text)
 
     def test_status_endpoint(self):
         response = requests.get(f"{self.base_url}/status")
