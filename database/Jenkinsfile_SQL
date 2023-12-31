@@ -8,27 +8,30 @@ pipeline {
                     // Démarrage du conteneur de base de données
                     mysqlContainer = docker.image('mysql:5.7').run('-d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container')
                     // Attendre que la base de données soit prête
-                    sh 'sleep 30' 
+                    sh 'sleep 30'
                 }
             }
         }
 
-        stage('Test Database') {
+        stage('Setup and Test Database') {
             steps {
                 script {
-                    // Insertion des données de test
+                    // Création de la table et insertion des données de test
                     sh """
-                    mysql -h 127.0.0.1 -P 3306 -umlops -pmlops mlops_weather -e "
+                    mysql -h 127.0.0.1 -P 3306 -uroot -pmysecretpassword -e "
+                    CREATE DATABASE IF NOT EXISTS mlops_weather;
+                    USE mlops_weather;
+                    CREATE TABLE IF NOT EXISTS weather_predictions (
+                        id INT PRIMARY KEY,
+                        date DATE,
+                        location VARCHAR(255),
+                        prediction INT,
+                        accuracy FLOAT
+                    );
                     INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                    (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                    (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
-                    ...; // Autres données
-                    "
-                    """
-
-                    // Vérification des données insérées
-                    sh """
-                    mysql -h 127.0.0.1 -P 3306 -umlops -pmlops mlops_weather -e "
+                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
+                        ...; // Autres données
                     SELECT * FROM weather_predictions;
                     "
                     """
