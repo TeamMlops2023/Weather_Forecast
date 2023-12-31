@@ -7,7 +7,7 @@ class TestDatabase(unittest.TestCase):
     def setUpClass(cls):
         # Connexion à la base de données
         cls.db = mysql.connector.connect(
-            host='localhost',
+            host='mysql-container',
             user='root',
             password='mysecretpassword',
             database='mlops_weather'
