@@ -19,7 +19,7 @@ pipeline {
                     sh 'sleep 10' // Laisser un peu de temps pour le démarrage du conteneur
 
                     // Exécuter les tests unitaires à l'intérieur du conteneur Docker
-                    sh 'docker exec ml-test-container python -m unittest discover -s machine_learning/tests'
+                    sh 'docker exec ml-test-container python -m unittest discover -s tests'
                 }
             }
         }
