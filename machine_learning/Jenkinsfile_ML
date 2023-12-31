@@ -1,24 +1,36 @@
 pipeline {
-    agent any // Utilisez n'importe quel agent disponible
+    agent any
 
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Assurez-vous d'être dans le répertoire contenant le Dockerfile
-                    dir('./Weather_Forecast/machine_learning') {
-                        // Construisez l'image Docker du modèle de machine learning
-                        sh 'docker build -t modele-image .'
-                        echo 'Construction de l\'image Docker réussie.'
-                    }
+                    // Construisez l'image Docker du modèle de machine learning
+                    mlContainer = docker.build('ml-model-image', './chemin_vers_dossier_machine_learning')
                 }
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+        stage('Run Container and Test') {
+            steps {
+                script {
+                    // Démarrer le conteneur et exécuter des tests basiques
+                    mlContainer.run('-d --name ml-test-container')
+                    sh 'sleep 10' // Donnez un peu de temps pour le démarrage du conteneur
+                    // Ici, vous pouvez exécuter des commandes pour tester le conteneur
+                    // Par exemple, vérifier que Python est installé, exécuter un script simple, etc.
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                script {
+                    // Nettoyage : Arrêter et supprimer le conteneur de test
+                    sh 'docker stop ml-test-container || true'
+                    sh 'docker rm ml-test-container || true'
+                }
+            }
         }
     }
 }
