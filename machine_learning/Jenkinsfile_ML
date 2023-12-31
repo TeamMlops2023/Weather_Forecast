@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Construisez l'image Docker du modèle de machine learning
-                    mlContainer = docker.build('ml-model-image', './chemin_vers_dossier_machine_learning')
+                    mlContainer = docker.build('ml-model-image', './machine_learning')
                 }
             }
         }
