@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     // Exécution des tests de la base de données
-                    sh "docker exec mysql-container python /path/to/tests/test_database.py"
+                    sh "docker exec mysql-container python /tests/test_database.py"
                 }
             }
         }
