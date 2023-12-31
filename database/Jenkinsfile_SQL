@@ -2,38 +2,66 @@ pipeline {
     agent any
 
     stages {
-        stage('Build Image') {
+        stage('Checkout SCM') {
             steps {
-                script {
-                    // Construire l'image Docker personnalisée
-                    sh 'docker build -t mysql-custom-image ./database'
-                }
+                // Checkout your source code from Git repository
+                checkout scm
             }
         }
+
         stage('Start Database') {
             steps {
                 script {
-                    // Démarrer le conteneur MySQL
-                    sh 'docker run -d --name mysql-container -p 3306:3306 mysql-custom-image'
+                    // Start MySQL container
+                    docker.image('mysql:5.7')
+                        .withRun('--name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306')
+                        .start()
+                    echo 'Lancement du conteneur de la base de données réussi.'
+                    // Démarrage du conteneur de base de données
+                    mysqlContainer = docker.image('mysql:5.7').run('-d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container')
                     // Attendre que la base de données soit prête
-                    sh 'sleep 30'
+                    sh 'sleep 30' 
                 }
             }
         }
+
+        stage('Build Model Image') {
+            steps {
+                script {
+                    // Build Docker image for your ML model
+                    docker.build('modele-image', '.')
+                    echo 'Construction de l\'image Docker réussie.'
+                }
+            }
+        }
+
         stage('Test Database') {
             steps {
                 script {
-                    // Exécuter le script de test
-                    sh 'docker exec mysql-container python /tests/test_database.py'
+                    // Exécutez le fichier de test pour créer la table et insérer des données
+                    sh 'python test_database.py'
                 }
             }
         }
+
+        stage('Run Model and Populate Database') {
+            steps {
+                script {
+                    // Run the model inside a Docker container and link it to the MySQL container
+                    docker.image('modele-image')
+                        .withRun('-d --rm --link mysql-container:mysql modele-image')
+                }
+            }
+        }
+
         stage('Cleanup') {
             steps {
                 script {
-                    // Arrêter et supprimer le conteneur
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
+                    // Nettoyage : Arrêter et supprimer les conteneurs
+                    if (mysqlContainer) {
+                        mysqlContainer.stop()
+                        mysqlContainer.remove()
+                    }
                 }
             }
         }
@@ -41,7 +69,12 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+            // Clean up Docker resources
+            script {
+                docker.image('mysql:5.7').stop()
+                docker.image('mysql:5.7').remove()
+                docker.image('modele-image').remove()
+            }
         }
     }
 }
