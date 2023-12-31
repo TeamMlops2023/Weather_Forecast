@@ -2,11 +2,20 @@ pipeline {
     agent any
 
     stages {
+        stage('Build Image') {
+            steps {
+                script {
+                    // Construire l'image Docker à partir du Dockerfile dans le répertoire 'database'
+                    sh 'docker build -t mysql-custom-image ./database'
+                }
+            }
+        }
+
         stage('Start Database') {
             steps {
                 script {
-                    // Démarrage du conteneur de base de données
-                    mysqlContainer = docker.image('mysql:5.7').run('-d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container')
+                    // Démarrage du conteneur de base de données en utilisant l'image personnalisée
+                    sh 'docker run -d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container mysql-custom-image'
                     // Attendre que la base de données soit prête
                     sh 'sleep 30'
                 }
@@ -16,8 +25,8 @@ pipeline {
         stage('Test Database') {
             steps {
                 script {
-                    // Exécution des tests de la base de données
-                    sh "docker exec mysql-container python /tests/test_database.py"
+                    // Exécution du script de test à l'intérieur du conteneur de base de données
+                    sh 'docker exec mysql-container python /tests/test_database.py'
                 }
             }
         }
@@ -25,11 +34,18 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    // Nettoyage : Arrêter et supprimer le conteneur de la base de données
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
+                    // Arrêter et supprimer le conteneur de la base de données
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Affiche un message à la fin de l'exécution du pipeline
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
