@@ -26,7 +26,7 @@ class TestMachineLearningModel(unittest.TestCase):
         le = LabelEncoder()
         df['location_encoded'] = le.fit_transform(df['location'])
         # Préparation des données pour l'entraînement
-        X = df.drop(['raintomorrow', 'year', 'month', 'day', 'location', 'date'], axis=1)
+        X = df.drop(['raintomorrow'], axis=1)
         y = df['raintomorrow']
         # Séparation en ensembles d'entraînement et de test
         X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -43,15 +43,8 @@ class TestMachineLearningModel(unittest.TestCase):
         # Encodage des variables catégorielles
         le = LabelEncoder()
         df['location_encoded'] = le.fit_transform(df['location'])
-        
-        # Vérifier si la colonne "date" existe
-        if 'date' in df.columns:
-            # Supprimer la colonne "date" si elle existe
-            X = df.drop(['raintomorrow', 'year', 'month', 'day', 'location', 'date'], axis=1)
-        else:
-            # Supprimer les colonnes "year", "month", "day", "location" si "date" n'existe pas
-            X = df.drop(['raintomorrow', 'year', 'month', 'day', 'location'], axis=1)
-            
+        # Préparation des données pour l'entraînement
+        X = df.drop(['raintomorrow'], axis=1)
         y = df['raintomorrow']
         # Séparation en ensembles d'entraînement et de test
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
