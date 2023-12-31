@@ -59,7 +59,7 @@ pipeline {
             steps {
                 script {
                     // Déploiement de l'application sur Kubernetes
-                    sh 'kubectl apply -f fastapi-deployment.yaml'
+                    sh 'kubectl apply -f kubernetes/fastapi/fastapi-deployment.yaml'
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
