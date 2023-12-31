@@ -42,10 +42,8 @@ pipeline {
             steps {
                 script {
                     // Nettoyage : Arrêter et supprimer le conteneur de la base de données
-                    if (mysqlContainer) {
-                        sh "docker stop ${mysqlContainer.getContainerId()}"
-                        sh "docker rm ${mysqlContainer.getContainerId()}"
-                    }
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
                 }
             }
         }
