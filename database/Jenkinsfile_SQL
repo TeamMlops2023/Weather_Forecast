@@ -1,85 +1,93 @@
+Skip to content
+TeamMlops2023
+/
+Weather_Forecast
+
+Type / to search
+
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Commit
+Update Jenkinsfile_SQL
+ BAS_ALAIN
+@Abicakci
+Abicakci committed 4 hours ago 
+1 parent a464187
+commit c46aa1f
+Showing 1 changed file with 1 addition and 1 deletion.
+ 2 changes: 1 addition & 1 deletion2  
+database/Jenkinsfile_SQL
+@@ -1,36 +1,36 @@
 pipeline {
     agent any
-    
-
     stages {
-        stage('Checkout SCM') {
-            steps {
-                // Checkout your source code from Git repository
-                checkout scm
-            }
-        }
-
         stage('Start Database') {
             steps {
                 script {
-                    // Start MySQL container
-                    docker.image('mysql:5.7')
-                        .withRun('--name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306')
-                        .start()
-                    echo 'Lancement du conteneur de la base de données réussi.'
                     // Démarrage du conteneur de base de données
                     mysqlContainer = docker.image('mysql:5.7').run('-d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container')
                     // Attendre que la base de données soit prête
-                    sh 'sleep 30' 
+                    sh 'sleep 30'
                 }
             }
         }
-        
-        stage('Build Model Image') {
-
-        stage('Test Database') {
+        stage('Setup and Test Database') {
             steps {
                 script {
-                    // Build Docker image for your ML model
-                    docker.build('modele-image', '.')
-                    echo 'Construction de l\'image Docker réussie.'
-                    // Insertion des données de test
+                    // Exécution des commandes MySQL à l'intérieur du conteneur
                     sh """
-                    mysql -h 127.0.0.1 -P 3306 -umlops -pmlops mlops_weather -e "
+                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
+                    CREATE DATABASE IF NOT EXISTS mlops_weather;
+                    USE mlops_weather;
+                    CREATE TABLE IF NOT EXISTS weather_predictions (
+                        id INT PRIMARY KEY,
+                        date DATE,
+                        location VARCHAR(255),
+                        prediction INT,
+                        accuracy FLOAT
+                    );
                     INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                    (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                    (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
-                    ...; // Autres données
-                    "
-                    """
-
-                    // Vérification des données insérées
-                    sh """
-                    mysql -h 127.0.0.1 -P 3306 -umlops -pmlops mlops_weather -e "
+                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467);
+                        (41054, '2017-05-08', 'Sydney', 1, 0.886467);
                     SELECT * FROM weather_predictions;
                     "
                     """
                 }
             }
         }
-        
-        stage('Run Model and Populate Database') {
-
         stage('Cleanup') {
             steps {
                 script {
-                    // Run the model inside a Docker container and link it to the MySQL container
-                    docker.image('modele-image')
-                        .withRun('-d --rm --link mysql-container:mysql modele-image')
                     // Nettoyage : Arrêter et supprimer le conteneur de la base de données
-                    if (mysqlContainer) {
-                        mysqlContainer.stop()
-                        mysqlContainer.remove()
-                    }
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
                 }
             }
         }
     }
-
-    post {
-        always {
-            // Clean up Docker resources
-            script {
-                docker.image('mysql:5.7').stop()
-                docker.image('mysql:5.7').remove()
-                docker.image('modele-image').remove()
-            }
-        }
-    }
 }
+0 comments on commit c46aa1f
+@Abicakci
+Comment
+ 
+Leave a comment
+ 
+ You’re not receiving notifications from this thread.
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+History for database/Jenkinsfile_SQL - TeamMlops2023/Weather_Forecast  
