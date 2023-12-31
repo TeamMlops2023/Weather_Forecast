@@ -12,16 +12,11 @@ pipeline {
         stage('Start Database') {
             steps {
                 script {
-                    // Start MySQL container
-                    def mysqlContainer = docker.image('mysql:5.7').run(
-                        "-d", "--name", "mysql-container",
-                    "-e", "MYSQL_ROOT_PASSWORD=mysecretpassword",
-                    "-e", "MYSQL_DATABASE=mlops_weather",
-                    "-p", "3306:3306"
-            )
-            echo 'Démarrage du conteneur de la base de données réussi.'
-            // Attendre que la base de données soit prête
-            sh 'sleep 30'
+                // Start MySQL container
+                docker.image('mysql:5.7').withRun('-d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306') { c ->
+                    echo 'Démarrage du conteneur de la base de données réussi.'
+                    // Attendre que la base de données soit prête
+                    sh 'sleep 30'
                 }
             }
         }
