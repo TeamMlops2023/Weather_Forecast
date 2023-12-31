@@ -16,7 +16,7 @@ pipeline {
                 script {
                     // Démarre le conteneur Docker sur le port 8000
                     sh 'docker run -d --name fastapi-container -p 8000:8000 fastapi-image'
-                    // Obtenir et stocker l'adresse IP du conteneur
+                    // Récupérer l'adresse IP du conteneur (peut être utilisée pour les tests)
                     CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fastapi-container", returnStdout: true).trim()
                     echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
                 }
@@ -27,18 +27,16 @@ pipeline {
                 script {
                     // Attendre que le serveur FastAPI démarre
                     sh 'sleep 10'
-                    echo 'Début des tests des endpoints.'
-                    // Exécuter les tests en passant l'adresse IP du conteneur
-                    sh "pytest ./tests/test_fastapi.py --container-ip ${CONTAINER_IP}"
+                    // Exécuter les tests en utilisant l'interpréteur Python
+                    sh 'python ./tests/test_fastapi.py'
                 }
             }
         }
         stage('Cleanup') {
             steps {
                 script {
-                    // Arrête le conteneur FastAPI s'il est en cours d'exécution
+                    // Arrêter et supprimer le conteneur FastAPI
                     sh 'docker stop fastapi-container || true'
-                    // Supprime le conteneur FastAPI
                     sh 'docker rm fastapi-container || true'
                     echo 'Arrêt et nettoyage du conteneur réussi.'
                 }
