@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Utilisation des identifiants stockés dans Jenkins
+        DOCKER_CREDENTIALS = credentials('dockerhub_credentials')
+    }
+
     stages {
         stage('Build and Push') {
             steps {
@@ -9,8 +14,8 @@ pipeline {
                     sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
                     echo 'Construction de l\'image Docker réussie.'
 
-                    // Connexion à Docker Hub
-                    sh 'echo $DOCKERHUB_PASSWORD | docker login --username mlopsweather2023 --password-stdin'
+                    // Connexion à Docker Hub en utilisant les identifiants
+                    sh 'echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin'
                     echo 'Connexion à Docker Hub réussie.'
 
                     // Pousse l'image vers Docker Hub
@@ -47,6 +52,15 @@ pipeline {
                     sh 'docker stop fastapi-container || true'
                     sh 'docker rm fastapi-container || true'
                     echo 'Arrêt et nettoyage du conteneur réussi.'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Déploiement de l'application sur Kubernetes
+                    sh 'kubectl apply -f fastapi-deployment.yaml'
+                    echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
         }
