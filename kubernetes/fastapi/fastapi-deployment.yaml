@@ -1,34 +1,34 @@
-# Déploiement de l'application FastAPI
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-deployment  # Nom du déploiement
+  name: fastapi-deployment
 spec:
-  replicas: 1  # Une seule réplique de l'application FastAPI
+  replicas: 1
   selector:
     matchLabels:
-      app: fastapi  # Sélectionne les pods avec l'étiquette "app: fastapi"
+      app: fastapi
   template:
     metadata:
       labels:
-        app: fastapi  # Étiquette attribuée aux pods créés
+        app: fastapi
     spec:
       containers:
-        - name: fastapi-container
-          image: fastapi-image:latest  # Image Docker à utiliser pour le conteneur
-          ports:
-            - containerPort: 8000  # Port exposé par le conteneur
+      - name: fastapi-container
+        image: mlopsweather2023/fastapi-image:latest
+        ports:
+        - containerPort: 8000
 
-# Service pour exposer l'application FastAPI
+---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: fastapi-service  # Nom du service
+  name: fastapi-service
 spec:
   selector:
-    app: fastapi  # Sélectionne les pods avec l'étiquette "app: fastapi"
+    app: fastapi
   ports:
-    - protocol: TCP
-      port: 80  # Port sur lequel le service écoute
-      targetPort: 8000  # Port vers lequel le service redirige le trafic (correspondant au conteneur)
-  type: LoadBalancer  # Type de service (LoadBalancer pour une exposition externe)
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: LoadBalancer
