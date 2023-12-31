@@ -4,6 +4,8 @@ pipeline {
     environment {
         // Utilisation des identifiants stockés dans Jenkins
         DOCKER_CREDENTIALS = credentials('dockerhub_credentials')
+        // Définissez la variable KUBECONFIG avec le chemin du kubeconfig
+        KUBECONFIG = '/var/jenkins_home/kind-kubeconfig'
     }
 
     stages {
@@ -58,8 +60,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Déploiement de l'application sur Kubernetes
-                    sh 'kubectl apply -f kubernetes/fastapi/fastapi-deployment.yaml'
+                    // Utilisez la variable KUBECONFIG pour définir le kubeconfig dans cette étape
+                    sh "kubectl --kubeconfig=${KUBECONFIG} apply -f kubernetes/fastapi/fastapi-deployment.yaml"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
