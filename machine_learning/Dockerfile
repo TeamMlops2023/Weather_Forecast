@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiez le script Python du modèle et les données nécessaires
 COPY modele.py .
 COPY data/ data/
-COPY /app/tests/ /app/tests/  # Ajoutez cette ligne pour copier les tests
+COPY tests/ tests/
 
 # Définissez la commande pour exécuter le service Flask
 CMD ["python", "modele.py"]
