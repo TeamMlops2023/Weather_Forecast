@@ -1,13 +1,13 @@
 import unittest
 import requests
+import os
 
 class TestFastAPIEndpoints(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://172.17.0.3:8000"  # Remplacez par l'adresse IP du conteneur
+        cls.base_url = os.environ.get('BASE_URL', 'http://localhost:8000')
 
     def test_root_endpoint(self):
-        """Test du endpoint racine."""
         print("Testing root endpoint...")
         response = requests.get(f"{self.base_url}/")
         self.assertEqual(response.status_code, 200)
@@ -15,7 +15,6 @@ class TestFastAPIEndpoints(unittest.TestCase):
         print("Root endpoint test passed.")
 
     def test_status_endpoint(self):
-        """Test du endpoint /status."""
         print("Testing status endpoint...")
         response = requests.get(f"{self.base_url}/status")
         self.assertEqual(response.status_code, 200)
@@ -23,7 +22,6 @@ class TestFastAPIEndpoints(unittest.TestCase):
         print("Status endpoint test passed.")
 
     def test_echo_endpoint(self):
-        """Test du endpoint /echo."""
         print("Testing echo endpoint...")
         test_message = "HelloJenkins"
         response = requests.get(f"{self.base_url}/echo", params={"text": test_message})
