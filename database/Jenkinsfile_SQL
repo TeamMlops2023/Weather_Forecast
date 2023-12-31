@@ -5,36 +5,33 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    // Construire l'image Docker à partir du Dockerfile dans le répertoire 'database'
+                    // Construire l'image Docker personnalisée
                     sh 'docker build -t mysql-custom-image ./database'
                 }
             }
         }
-
         stage('Start Database') {
             steps {
                 script {
-                    // Démarrage du conteneur de base de données en utilisant l'image personnalisée
-                    sh 'docker run -d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container mysql-custom-image'
+                    // Démarrer le conteneur MySQL
+                    sh 'docker run -d --name mysql-container -p 3306:3306 mysql-custom-image'
                     // Attendre que la base de données soit prête
                     sh 'sleep 30'
                 }
             }
         }
-
         stage('Test Database') {
             steps {
                 script {
-                    // Exécution du script de test à l'intérieur du conteneur de base de données
+                    // Exécuter le script de test
                     sh 'docker exec mysql-container python /tests/test_database.py'
                 }
             }
         }
-
         stage('Cleanup') {
             steps {
                 script {
-                    // Arrêter et supprimer le conteneur de la base de données
+                    // Arrêter et supprimer le conteneur
                     sh 'docker stop mysql-container || true'
                     sh 'docker rm mysql-container || true'
                 }
@@ -44,7 +41,6 @@ pipeline {
 
     post {
         always {
-            // Affiche un message à la fin de l'exécution du pipeline
             echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
