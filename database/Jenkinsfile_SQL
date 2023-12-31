@@ -13,8 +13,8 @@ pipeline {
             steps {
                 script {
                     // Start MySQL container
-                    docker.image('mysql:5.7').withRun('-d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306')
-                    echo 'Lancement du conteneur de la base de données réussi.'
+                    def mysqlContainer = docker.image('mysql:5.7').run('-d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306')
+                    echo 'Démarrage du conteneur de la base de données réussi.'
                     // Attendre que la base de données soit prête
                     sh 'sleep 30'
                 }
@@ -28,10 +28,11 @@ pipeline {
 
     post {
         always {
-            // Nettoyez les ressources Docker à la fin
+            // Arrêtez et supprimez le conteneur Docker MySQL
             script {
-                docker.image('mysql:5.7').stop()
-                docker.image('mysql:5.7').remove()
+                def mysqlContainer = docker.image('mysql:5.7')
+                mysqlContainer.stop()
+                mysqlContainer.remove()
             }
         }
     }
