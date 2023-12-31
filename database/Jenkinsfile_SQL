@@ -1,28 +1,3 @@
-Skip to content
-TeamMlops2023
-/
-Weather_Forecast
-
-Type / to search
-
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-Commit
-Update Jenkinsfile_SQL
- BAS_ALAIN
-@Abicakci
-Abicakci committed 4 hours ago 
-1 parent a464187
-commit c46aa1f
-Showing 1 changed file with 1 addition and 1 deletion.
- 2 changes: 1 addition & 1 deletion2  
-database/Jenkinsfile_SQL
-@@ -1,36 +1,36 @@
 pipeline {
     agent any
     stages {
@@ -72,22 +47,3 @@ pipeline {
         }
     }
 }
-0 comments on commit c46aa1f
-@Abicakci
-Comment
- 
-Leave a comment
- 
- You’re not receiving notifications from this thread.
-Footer
-© 2023 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
-Security
-Status
-Docs
-Contact
-Manage cookies
-Do not share my personal information
-History for database/Jenkinsfile_SQL - TeamMlops2023/Weather_Forecast  
