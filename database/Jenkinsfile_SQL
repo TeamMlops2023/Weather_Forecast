@@ -29,11 +29,10 @@ pipeline {
 
     post {
         always {
-            // Arrêtez et supprimez le conteneur Docker MySQL
+            // Arrêter et supprimer le conteneur Docker MySQL
             script {
-                def mysqlContainer = docker.image('mysql:5.7')
-                mysqlContainer.stop()
-                mysqlContainer.remove()
+                sh 'docker stop mysql-container'
+                sh 'docker rm -f mysql-container'
             }
         }
     }
