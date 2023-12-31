@@ -47,10 +47,10 @@ class TestMachineLearningModel(unittest.TestCase):
         X = df.drop(['raintomorrow', 'year', 'month', 'day', 'location', 'date'], axis=1)
         y = df['raintomorrow']
         # Séparation en ensembles d'entraînement et de test
-        _, X_test, _, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         # Entraînement du modèle
         model = RandomForestClassifier()
-        model.fit(X_test, y_test)
+        model.fit(X_train, y_train)
         # Faire des prédictions
         predictions = model.predict(X_test)
         # Vérifier que le nombre de prédictions correspond au nombre d'observations
