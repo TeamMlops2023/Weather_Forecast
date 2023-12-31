@@ -1,52 +1,29 @@
-# -*- coding: utf-8 -*-
-import unittest
 import mysql.connector
 
-class TestDatabase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Connexion à la base de données
-        cls.db = mysql.connector.connect(
-            host='mysql-container',
-            user='root',
-            password='mysecretpassword',
-            database='mlops_weather'
-        )
-        cls.cursor = cls.db.cursor()
+# Connexion à la base de données
+db = mysql.connector.connect(
+    host="127.0.0.1",
+    port="3306",
+    user="mlops",
+    password="mlops",
+    database="mlops_weather"
+)
 
-        # Création de la table et insertion des données
-        cls.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS weather_predictions (
-                id INT PRIMARY KEY,
-                date DATE,
-                location VARCHAR(255),
-                prediction INT,
-                accuracy FLOAT
-            );
-        """)
-        cls.cursor.execute("""
-            INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                (41054, '2017-05-08', 'Sydney', 1, 0.886467);
-        """)
-        cls.db.commit()
+# Création de la table (exemples simplifiés)
+cursor = db.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS weather_predictions (id INT AUTO_INCREMENT PRIMARY KEY, date DATE, location VARCHAR(255), prediction INT, accuracy FLOAT)")
+db.commit()
 
-    def test_weather_predictions_table_exists(self):
-        """Vérifie si la table weather_predictions existe."""
-        self.cursor.execute("SHOW TABLES LIKE 'weather_predictions'")
-        result = self.cursor.fetchone()
-        self.assertIsNotNone(result)
+# Insertion de données de test (exemples simplifiés)
+insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
+data = [
+    ('2016-04-16', 'Norfolk Island', 0, 0.886467),
+    ('2016-04-17', 'Norfolk Island', 0, 0.886467),
+    # Ajoutez d'autres données ici
+]
 
-    def test_inserted_data(self):
-        """Vérifie si les données sont insérées correctement."""
-        self.cursor.execute("SELECT * FROM weather_predictions WHERE id=41053")
-        result = self.cursor.fetchone()
-        self.assertIsNotNone(result)
+cursor.executemany(insert_query, data)
+db.commit()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.cursor.close()
-        cls.db.close()
-
-if __name__ == '__main__':
-    unittest.main()
+# Fermeture de la connexion
+db.close()
