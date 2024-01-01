@@ -8,8 +8,8 @@ pipeline {
     stages {
         stage('Get kind-Kubeconfig') {
             steps {
-                // Télécharge kind-Kubeconfig depuis GitHub
-                sh 'wget https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig -O kind-kubeconfig'
+                // Télécharge kind-Kubeconfig depuis GitHub en utilisant curl
+                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
