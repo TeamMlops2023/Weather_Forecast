@@ -73,7 +73,7 @@ pipeline {
             steps {
                 script {
                     // Copier le fichier de déploiement depuis le dépôt Git cloné vers le conteneur kind-control-plane
-                    sh "docker cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
+                    sh "docker cp mlops_2023_fastapi/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
                 }
             }
         }
