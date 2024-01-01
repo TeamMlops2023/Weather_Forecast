@@ -25,5 +25,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Ajouter Docker Compose au PATH (optionnel si déjà dans /usr/local/bin)
 RUN echo 'PATH=$PATH:/usr/local/bin' >> /etc/profile
 
+# Ajouter l'utilisateur Jenkins au groupe Docker
+RUN groupadd -for -g 999 docker && usermod -aG docker jenkins
 # Revenir à l'utilisateur Jenkins pour des raisons de sécurité
 USER jenkins
