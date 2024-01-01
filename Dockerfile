@@ -19,6 +19,11 @@ RUN apt-get update && apt-get install -y docker-ce-cli \
     && curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
 
+# Installer kubectl
+RUN curl -LO "https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl" \
+    && chmod +x ./kubectl \
+    && mv ./kubectl /usr/local/bin/kubectl
+
 # Nettoyer les fichiers temporaires
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -27,5 +32,6 @@ RUN echo 'PATH=$PATH:/usr/local/bin' >> /etc/profile
 
 # Ajouter l'utilisateur Jenkins au groupe Docker
 RUN groupadd -for -g 999 docker && usermod -aG docker jenkins
+
 # Revenir à l'utilisateur Jenkins pour des raisons de sécurité
 USER jenkins
