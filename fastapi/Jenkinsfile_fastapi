@@ -3,26 +3,26 @@ pipeline {
 
     environment {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
-        // Utilisation des identifiants stockés dans Jenkins
-        DOCKER_CREDENTIALS = credentials('dockerhub_credentials')
-
     }
 
     stages {
         stage('Build and Push') {
             steps {
                 script {
-                    // Construit l'image Docker à partir du répertoire 'fastapi'
-                    sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
-                    echo 'Construction de l\'image Docker réussie.'
+                    // Utilisation du bloc withCredentials pour les informations d'identification Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        // Construit l'image Docker à partir du répertoire 'fastapi'
+                        sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
+                        echo 'Construction de l\'image Docker réussie.'
 
-                    // Connexion à Docker Hub en utilisant les identifiants
-                    sh 'echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin'
-                    echo 'Connexion à Docker Hub réussie.'
+                        // Connexion à Docker Hub en utilisant les identifiants
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                        echo 'Connexion à Docker Hub réussie.'
 
-                    // Pousse l'image vers Docker Hub
-                    sh 'docker push mlopsweather2023/fastapi-image:latest'
-                    echo 'Image Docker poussée vers Docker Hub.'
+                        // Pousse l'image vers Docker Hub
+                        sh 'docker push mlopsweather2023/fastapi-image:latest'
+                        echo 'Image Docker poussée vers Docker Hub.'
+                    }
                 }
             }
         }
@@ -60,7 +60,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Utilisez la variable KUBECONFIG pour définir le kubeconfig dans cette étape
+                    // Utiliser la variable KUBECONFIG pour le déploiement Kubernetes
                     sh "kubectl --kubeconfig=${KUBECONFIG} apply -f kubernetes/fastapi/fastapi-deployment.yaml"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
