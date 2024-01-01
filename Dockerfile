@@ -21,6 +21,9 @@ RUN curl -LO "https://storage.googleapis.com/kubernetes-release/release/`curl -s
     && chmod +x ./kubectl \
     && mv ./kubectl /usr/local/bin/kubectl
 
+# Ajouter l'utilisateur Jenkins au groupe Docker
+RUN usermod -aG docker jenkins
+
 # Ajouter Docker Compose au PATH pour tous les utilisateurs (dans le profil global)
 RUN echo 'PATH=$PATH:/usr/local/bin' >> /etc/profile
 
