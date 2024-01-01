@@ -27,5 +27,8 @@ RUN usermod -aG docker jenkins
 # Ajouter Docker Compose au PATH pour tous les utilisateurs (dans le profil global)
 RUN echo 'PATH=$PATH:/usr/local/bin' >> /etc/profile
 
-# Revenir à l'utilisateur Jenkins pour des raisons de sécurité
+USER root
+# Ajoutez l'utilisateur Jenkins au groupe Docker avec l'ID 999
+RUN groupadd -g 999 docker && usermod -aG docker jenkins
 USER jenkins
+
