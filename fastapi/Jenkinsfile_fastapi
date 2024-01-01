@@ -6,6 +6,14 @@ pipeline {
     }
 
     stages {
+        stage('Get kind-Kubeconfig') {
+            steps {
+                // Télécharge kind-Kubeconfig depuis GitHub
+                sh 'wget https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig -O kind-kubeconfig'
+                echo 'kind-Kubeconfig récupéré depuis GitHub.'
+            }
+        }
+
         stage('Build and Push') {
             steps {
                 script {
@@ -60,8 +68,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Utiliser la variable KUBECONFIG pour le déploiement Kubernetes
-                    sh "kubectl --kubeconfig=${KUBECONFIG} apply -f kubernetes/fastapi/fastapi-deployment.yaml"
+                    // Utiliser kind-Kubeconfig pour le déploiement Kubernetes
+                    sh "kubectl --kubeconfig=kind-kubeconfig apply -f kubernetes/fastapi/fastapi-deployment.yaml"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
