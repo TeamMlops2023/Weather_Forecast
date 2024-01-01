@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
         // Utilisation des identifiants stockés dans Jenkins
         DOCKER_CREDENTIALS = credentials('dockerhub_credentials')
 
