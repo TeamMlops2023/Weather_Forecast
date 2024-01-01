@@ -28,7 +28,7 @@ RUN usermod -aG docker jenkins
 RUN echo 'PATH=$PATH:/usr/local/bin' >> /etc/profile
 
 USER root
-# Ajoutez l'utilisateur Jenkins au groupe Docker avec l'ID 999
-RUN groupadd -g 999 docker && usermod -aG docker jenkins
+# Ajoutez l'utilisateur Jenkins au groupe Docker
+RUN usermod -aG docker jenkins
 USER jenkins
 
