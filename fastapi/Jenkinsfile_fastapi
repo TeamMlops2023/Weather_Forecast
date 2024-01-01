@@ -69,7 +69,7 @@ pipeline {
             steps {
                 script {
                     // Utiliser kind-Kubeconfig pour le déploiement Kubernetes
-                    sh "kubectl --kubeconfig=kind-kubeconfig apply -f kubernetes/fastapi/fastapi-deployment.yaml"
+                    sh "kubectl --kubeconfig=kind-kubeconfig apply -f kubernetes/fastapi/fastapi-deployment.yaml --validate=false"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
