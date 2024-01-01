@@ -34,6 +34,7 @@ pipeline {
                 }
             }
         }
+
         stage('Run') {
             steps {
                 script {
@@ -45,6 +46,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test') {
             steps {
                 script {
@@ -55,6 +57,7 @@ pipeline {
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 script {
@@ -65,11 +68,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Copy Deployment File to Kind') {
+            steps {
+                script {
+                    // Copier le fichier de déploiement depuis le dépôt Git cloné vers le conteneur kind-control-plane
+                    sh "docker cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Exécuter kubectl dans le conteneur Kubernetes
-                    sh "docker exec kind-control-plane kubectl apply -f kubernetes/fastapi/fastapi-deployment.yaml --validate=false"
+                    // Appliquer le fichier de déploiement dans le conteneur kind-control-plane
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
