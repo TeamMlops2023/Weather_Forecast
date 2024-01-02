@@ -18,22 +18,7 @@ spec:
         image: mlopsweather2023/fastapi-image:latest
         ports:
         - containerPort: 8000
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: fastapi-service
-spec:
-  selector:
-    app: fastapi
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8000
-    nodePort: 31381  # Assurez-vous que cette ligne est correctement indentée
-  type: NodePort
-
-    
-# type: LoadBalancer
+      - name: port-forward-container
+        image: kubectl
+        command: ["kubectl"]
+        args: ["port-forward", "fastapi-deployment-65c57fd9f6-kbdw2", "8080:8000"]
