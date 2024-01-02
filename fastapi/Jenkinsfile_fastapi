@@ -51,11 +51,14 @@ pipeline {
                 }
             }
         }
-        stage('Cloner le Dépôt Git') {
+        stage('Cloner le Dépôt Git et Copier le Fichier de Déploiement') {
             steps {
                 script {
                     // Cloner le dépôt Git pour récupérer le fichier fastapi-deployment.yaml
                     sh 'git clone https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    // Imprimer la structure des répertoires pour déboguer
+                    sh 'ls -R Weather_Forecast/kubernetes/'
+                    // Copier le fichier dans le répertoire actuel
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
                 }
             }
