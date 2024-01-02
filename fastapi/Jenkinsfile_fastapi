@@ -6,6 +6,15 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Deployment File') {
+            steps {
+                script {
+                    // Copie le fichier de déploiement depuis /tmp vers le workspace Jenkins
+                    sh 'cp /tmp/fastapi-deployment.yaml .'
+                }
+            }
+        }
+
         stage('Get kind-Kubeconfig') {
             steps {
                 // Télécharge kind-Kubeconfig depuis GitHub en utilisant curl
@@ -72,8 +81,8 @@ pipeline {
         stage('Copy Deployment File to Kind') {
             steps {
                 script {
-                    // Copier le fichier de déploiement depuis le dépôt Git cloné vers le conteneur kind-control-plane
-                    sh "docker cp /tmp/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
+                    // Copie le fichier de déploiement depuis le workspace Jenkins vers le conteneur kind-control-plane
+                    sh 'docker cp fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
                 }
             }
         }
