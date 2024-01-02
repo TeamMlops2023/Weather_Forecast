@@ -21,4 +21,4 @@ spec:
       - name: port-forward-container
         image: kubectl
         command: ["kubectl"]
-        args: ["port-forward", "fastapi-deployment-65c57fd9f6-kbdw2", "8080:8000"]
+        args: ["port-forward", "fastapi-deployment-65c57fd9f6-kbdw2", "8081:8000"]
