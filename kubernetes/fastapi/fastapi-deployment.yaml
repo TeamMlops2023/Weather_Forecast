@@ -32,7 +32,8 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 8000
-     nodePort: 31381  
+    nodePort: 31381  # Assurez-vous que cette ligne est correctement indentée
   type: NodePort
+
     
 # type: LoadBalancer
