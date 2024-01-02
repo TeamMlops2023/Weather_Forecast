@@ -6,13 +6,11 @@ pipeline {
     stages {
         stage('Prepare Environment') {
             steps {
-                // Supprimer le répertoire s'il existe pour éviter des conflits lors du clonage
-                sh 'rm -rf Weather_Forecast'
+                sh 'rm -rf Weather_Forecast' // Assurez-vous que le répertoire est propre avant le clonage
             }
         }
         stage('Get kind-Kubeconfig') {
             steps {
-                // Télécharge kind-Kubeconfig depuis GitHub en utilisant curl
                 sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
@@ -60,20 +58,16 @@ pipeline {
         stage('Cloner le Dépôt Git et Copier le Fichier de Déploiement') {
             steps {
                 script {
-                    sh 'git clone https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'pwd'
-                    sh 'ls -la' // Liste tous les fichiers et dossiers dans le répertoire de travail actuel
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
                     sh 'ls -la Weather_Forecast/' // Liste tous les fichiers et dossiers dans Weather_Forecast
-                    sh 'ls -la Weather_Forecast/kubernetes' // Liste tous les fichiers et dossiers dans Weather_Forecast/kubernetes
+                    sh 'ls -la Weather_Forecast/kubernetes/fastapi' // Assurez-vous que le chemin est correct et que le fichier est présent
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .' // Copie le fichier dans le répertoire actuel
-
                 }
             }
         }
         stage('Copy Deployment File to Kind') {
             steps {
                 script {
-                    // Copier le fichier depuis le workspace Jenkins vers le conteneur kind-control-plane
                     sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
                 }
             }
