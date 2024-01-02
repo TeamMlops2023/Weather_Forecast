@@ -18,7 +18,3 @@ spec:
         image: mlopsweather2023/fastapi-image:latest
         ports:
         - containerPort: 8000
-      - name: port-forward-container
-        image: kubectl
-        command: ["kubectl"]
-        args: ["port-forward", "fastapi-deployment-65c57fd9f6-kbdw2", "8081:8000"]
