@@ -61,8 +61,12 @@ pipeline {
             steps {
                 script {
                     sh 'git clone https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'ls -R Weather_Forecast/kubernetes/'
-                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
+                    sh 'pwd'
+                    sh 'ls -la' // Liste tous les fichiers et dossiers dans le répertoire de travail actuel
+                    sh 'ls -la Weather_Forecast/' // Liste tous les fichiers et dossiers dans Weather_Forecast
+                    sh 'ls -la Weather_Forecast/kubernetes' // Liste tous les fichiers et dossiers dans Weather_Forecast/kubernetes
+                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .' // Copie le fichier dans le répertoire actuel
+
                 }
             }
         }
