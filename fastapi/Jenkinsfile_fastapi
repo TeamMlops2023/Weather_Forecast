@@ -1,20 +1,9 @@
 pipeline {
     agent any
-
     environment {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
-
     stages {
-        stage('Prepare Deployment File') {
-            steps {
-                script {
-                    // Copie le fichier de déploiement depuis /tmp vers le workspace Jenkins
-                    sh 'cp /tmp/fastapi-deployment.yaml .'
-                }
-            }
-        }
-
         stage('Get kind-Kubeconfig') {
             steps {
                 // Télécharge kind-Kubeconfig depuis GitHub en utilisant curl
@@ -22,7 +11,6 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-
         stage('Build and Push') {
             steps {
                 script {
@@ -31,11 +19,9 @@ pipeline {
                         // Construit l'image Docker à partir du répertoire 'fastapi'
                         sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
                         echo 'Construction de l\'image Docker réussie.'
-
                         // Connexion à Docker Hub en utilisant les identifiants
                         sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
                         echo 'Connexion à Docker Hub réussie.'
-
                         // Pousse l'image vers Docker Hub
                         sh 'docker push mlopsweather2023/fastapi-image:latest'
                         echo 'Image Docker poussée vers Docker Hub.'
@@ -43,7 +29,6 @@ pipeline {
                 }
             }
         }
-
         stage('Run') {
             steps {
                 script {
@@ -55,7 +40,6 @@ pipeline {
                 }
             }
         }
-
         stage('Test') {
             steps {
                 script {
@@ -66,7 +50,6 @@ pipeline {
                 }
             }
         }
-
         stage('Cleanup') {
             steps {
                 script {
@@ -77,16 +60,15 @@ pipeline {
                 }
             }
         }
-
         stage('Copy Deployment File to Kind') {
             steps {
                 script {
-                    // Copie le fichier de déploiement depuis le workspace Jenkins vers le conteneur kind-control-plane
-                    sh 'docker cp fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
+                    // Copier le fichier de déploiement depuis le dépôt Git cloné vers le conteneur kind-control-plane
+                    sh "docker cp /home/alain/Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
+                    sh "docker cp /tmp/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml"
                 }
             }
         }
-
         stage('Deploy to Kubernetes') {
             steps {
                 script {
@@ -97,7 +79,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             // Affiche un message à la fin de l'exécution du pipeline
