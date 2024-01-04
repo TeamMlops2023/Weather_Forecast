@@ -29,20 +29,28 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
-                    // Clone le dépôt Git
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    // Copie les fichiers de déploiement, service et Ingress dans le répertoire de travail
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-service.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
-                    // Copie les fichiers dans le control-plane de Kind
+                }
+            }
+        }
+        stage('Copy Deployment, Service and Ingress Files to Kind') {
+            steps {
+                script {
                     sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
                     sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
                     sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    // Applique les fichiers de déploiement, service et Ingress
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
@@ -50,23 +58,7 @@ pipeline {
                 }
             }
         }
-        stage('Test') {
-            steps {
-                script {
-                    sh 'sleep 10' // Attendre que le service soit disponible
-                    // Ici, ajoutez vos commandes de test pour FastAPI
-                    // Par exemple, vous pouvez exécuter des scripts de test qui frappent votre API FastAPI via l'Ingress
-                }
-            }
-        }
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Nettoyage si nécessaire
-                    echo 'Nettoyage des ressources.'
-                }
-            }
-        }
+        // Incluez ici vos autres étapes, comme les étapes de test, si nécessaire
     }
     post {
         always {
