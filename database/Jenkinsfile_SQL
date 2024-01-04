@@ -1,12 +1,12 @@
 pipeline {
     agent any
     environment {
-        KUBECONFIG = '/var/jenkins_home/.kube/config'
+        KUBECONFIG = '/var/jenkins_home/.kube/config' // Configuration de l'environnement pour Kubernetes
     }
     stages {
         stage('Prepare Environment') {
             steps {
-                sh 'rm -rf Weather_Forecast'
+                sh 'rm -rf Weather_Forecast' // Nettoyer le répertoire pour éviter tout conflit lors du clonage
             }
         }
         stage('Get kind-Kubeconfig') {
@@ -15,16 +15,16 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Build and Push') {
+        stage('Build and Push MySQL Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
-                        echo 'Construction de l\'image Docker réussie.'
+                        sh 'docker build -t mlopsweather2023/mysql-image:latest ./mysql'
+                        echo 'Construction de l\'image Docker MySQL réussie.'
                         sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
                         echo 'Connexion à Docker Hub réussie.'
-                        sh 'docker push mlopsweather2023/fastapi-image:latest'
-                        echo 'Image Docker poussée vers Docker Hub.'
+                        sh 'docker push mlopsweather2023/mysql-image:latest'
+                        echo 'Image Docker MySQL poussée vers Docker Hub.'
                     }
                 }
             }
@@ -32,7 +32,7 @@ pipeline {
         stage('Start MySQL Container') {
             steps {
                 script {
-                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword mysql:latest'
+                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword mlopsweather2023/mysql-image:latest'
                     echo 'Conteneur MySQL démarré.'
                 }
             }
@@ -64,9 +64,9 @@ pipeline {
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh 'docker stop fastapi-container || true'
-                    sh 'docker rm fastapi-container || true'
-                    echo 'Arrêt et nettoyage du conteneur de test réussi.'
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    echo 'Arrêt et nettoyage du conteneur MySQL réussi.'
                 }
             }
         }
@@ -74,8 +74,8 @@ pipeline {
             steps {
                 script {
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/mysql/mysql-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/mysql/mysql-service.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
                 }
             }
@@ -83,20 +83,20 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
-                    sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
+                    sh 'docker cp ./mysql-deployment.yaml kind-control-plane:/mysql-deployment.yaml'
+                    sh 'docker cp ./mysql-service.yaml kind-control-plane:/mysql-service.yaml'
                     sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /mysql-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /mysql-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
-                    echo 'Déploiement sur Kubernetes réussi.'
+                    echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline MySQL terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
