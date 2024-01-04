@@ -11,7 +11,6 @@ pipeline {
         }
         stage('Get kind-Kubeconfig') {
             steps {
-                // Télécharger le fichier de configuration kind-Kubeconfig depuis GitHub
                 sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
@@ -19,9 +18,7 @@ pipeline {
         stage('Build and Push') {
             steps {
                 script {
-                    // Utiliser les identifiants Docker Hub pour se connecter et pousser l'image
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        // Construire l'image Docker pour FastAPI et la pousser vers Docker Hub
                         sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
                         echo 'Construction de l\'image Docker réussie.'
                         sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
@@ -32,32 +29,42 @@ pipeline {
                 }
             }
         }
+        stage('Run and Test') {
+            steps {
+                script {
+                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
+                    CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fastapi-container", returnStdout: true).trim()
+                    echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
+                    sh 'sleep 10' // Attendre que le serveur FastAPI démarre
+                    sh "docker exec -e BASE_URL=http://${CONTAINER_IP}:8000 fastapi-container python /app/tests/test_fastapi.py"
+                }
+            }
+        }
+        stage('Cleanup Test Container') {
+            steps {
+                script {
+                    sh 'docker stop fastapi-container || true'
+                    sh 'docker rm fastapi-container || true'
+                    echo 'Arrêt et nettoyage du conteneur de test réussi.'
+                }
+            }
+        }
         stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
-                    // Cloner le dépôt Git contenant les fichiers de configuration Kubernetes
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    // Copier les fichiers de déploiement, service et Ingress dans le répertoire de travail
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-service.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
                 }
             }
         }
-        stage('Copy Deployment, Service and Ingress Files to Kind') {
-            steps {
-                script {
-                    // Copier les fichiers de configuration dans le control-plane de Kind
-                    sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
-                    sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
-                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                }
-            }
-        }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Appliquer les fichiers de déploiement, service et Ingress sur Kubernetes
+                    sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
+                    sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
+                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
@@ -65,28 +72,9 @@ pipeline {
                 }
             }
         }
-        stage('Test') {
-            steps {
-                script {
-                    // Attendre que le serveur FastAPI soit opérationnel
-                    sh 'sleep 10'
-                    // Exécuter le script de test FastAPI à l'intérieur du conteneur
-                    sh "docker exec -e BASE_URL=http://${CONTAINER_IP}:8000 fastapi-container python /app/tests/test_fastapi.py"
-                }
-            }
-        }
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Nettoyage des ressources si nécessaire
-                    echo 'Nettoyage des ressources.'
-                }
-            }
-        }
     }
     post {
         always {
-            // Message de fin d'exécution du pipeline
             echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
