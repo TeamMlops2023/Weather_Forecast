@@ -60,8 +60,8 @@ pipeline {
             steps {
                 script {
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/mysql/mysql-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/mysql/mysql-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
                 }
             }
@@ -69,11 +69,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'docker cp ./mysql-deployment.yaml kind-control-plane:/mysql-deployment.yaml'
-                    sh 'docker cp ./mysql-service.yaml kind-control-plane:/mysql-service.yaml'
+                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
+                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
                     sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /mysql-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /mysql-service.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
