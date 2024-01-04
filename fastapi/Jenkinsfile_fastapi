@@ -50,6 +50,15 @@ pipeline {
                 }
             }
         }
+        stage('Test') {
+            steps {
+                script {
+                    sh 'sleep 10' // Attendre que le service soit disponible
+                    // Ici, ajoutez vos commandes de test pour FastAPI
+                    // Par exemple, vous pouvez exécuter des scripts de test qui frappent votre API FastAPI via l'Ingress
+                }
+            }
+        }
         stage('Cleanup') {
             steps {
                 script {
