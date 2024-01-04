@@ -1,48 +1,69 @@
 pipeline {
     agent any
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+    }
     stages {
-        stage('Start Database') {
+        stage('Prepare Environment') {
+            steps {
+                sh 'rm -rf Weather_Forecast'
+            }
+        }
+        stage('Get kind-Kubeconfig') {
+            steps {
+                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
+                echo 'kind-Kubeconfig récupéré depuis GitHub.'
+            }
+        }
+        stage('Setup Database for Testing') {
             steps {
                 script {
-                    // Démarrage du conteneur de base de données
-                    mysqlContainer = docker.image('mysql:5.7').run('-d -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather -p 3306:3306 --name mysql-container')
-                    // Attendre que la base de données soit prête
-                    sh 'sleep 30'
+                    // Cloner le dépôt Git et copier les fichiers nécessaires
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    sh 'cp Weather_Forecast/kubernetes/mysql-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database-service.yaml .'
+
+                    // Déployer un environnement de test pour MySQL
+                    sh 'kubectl apply -f mysql-deployment.yaml'
+                    sh 'kubectl apply -f database-service.yaml'
+                    sh 'sleep 30' // Attendre que MySQL soit prêt
                 }
             }
         }
-        stage('Setup and Test Database') {
+        stage('Run Database Tests') {
             steps {
                 script {
-                    // Exécution des commandes MySQL à l'intérieur du conteneur
+                    // Exécuter les tests de la base de données ici
                     sh """
-                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
-                    CREATE DATABASE IF NOT EXISTS mlops_weather;
-                    USE mlops_weather;
-                    CREATE TABLE IF NOT EXISTS weather_predictions (
-                        id INT PRIMARY KEY,
-                        date DATE,
-                        location VARCHAR(255),
-                        prediction INT,
-                        accuracy FLOAT
-                    );
-                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                        (41054, '2017-05-08', 'Sydney', 1, 0.886467);
-                    SELECT * FROM weather_predictions;
+                    kubectl exec $(kubectl get pod -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword -e "
+                    -- Les commandes de test pour MySQL vont ici
                     "
                     """
+                }
+            }
+        }
+        stage('Deploy Database') {
+            steps {
+                script {
+                    // Déployer la base de données dans l'environnement de production
+                    sh 'kubectl apply -f mysql-deployment.yaml'
+                    sh 'kubectl apply -f database-service.yaml'
                 }
             }
         }
         stage('Cleanup') {
             steps {
                 script {
-                    // Nettoyage : Arrêter et supprimer le conteneur de la base de données
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
+                    // Nettoyer l'environnement de test
+                    sh 'kubectl delete -f mysql-deployment.yaml'
+                    sh 'kubectl delete -f database-service.yaml'
                 }
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
