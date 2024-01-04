@@ -7,46 +7,34 @@ pipeline {
         stage('Prepare Environment') {
             steps {
                 sh 'rm -rf Weather_Forecast'
-            }
-        }
-        stage('Get kind-Kubeconfig') {
-            steps {
                 sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Setup Database for Testing') {
+        stage('Clone Repo and Copy Files') {
             steps {
-                script {
-                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
-                }
+                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
-                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
-                }
+                sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
+                sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
+                sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
+                sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
             }
         }
         stage('Run Database Tests') {
             steps {
-                script {
-                    // Ici, ajoutez les commandes de test pour votre base de données
-                }
+                // Ajoutez vos commandes de test ici
             }
         }
         stage('Cleanup') {
             steps {
-                script {
-                    sh "docker exec kind-control-plane kubectl delete -f /database-deployment.yaml"
-                    sh "docker exec kind-control-plane kubectl delete -f /database-service.yaml"
-                }
+                sh "docker exec kind-control-plane kubectl delete -f /database-deployment.yaml"
+                sh "docker exec kind-control-plane kubectl delete -f /database-service.yaml"
             }
         }
     }
