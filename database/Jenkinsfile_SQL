@@ -18,45 +18,35 @@ pipeline {
         stage('Setup Database for Testing') {
             steps {
                 script {
-                    // Cloner le dépôt Git et copier les fichiers nécessaires
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
                     sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
-
-                    // Déployer un environnement de test pour MySQL
-                    sh 'kubectl apply -f database-deployment.yaml'
-                    sh 'kubectl apply -f database-service.yaml'
-                    sh 'sleep 30' // Attendre que MySQL soit prêt
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
+                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
                 }
             }
         }
         stage('Run Database Tests') {
             steps {
                 script {
-                    // Exécuter les tests de la base de données ici
-                    sh '''
-                    kubectl exec $(kubectl get pod -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword -e "
-                    -- Les commandes de test pour MySQL vont ici
-                    "
-                    '''
-                }
-            }
-        }
-        stage('Deploy Database') {
-            steps {
-                script {
-                    // Déployer la base de données dans l'environnement de production
-                    sh 'kubectl apply -f mysql-deployment.yaml'
-                    sh 'kubectl apply -f database-service.yaml'
+                    // Ici, vous pouvez ajouter des commandes pour tester votre base de données
+                    // en utilisant `docker exec kind-control-plane kubectl ...`
                 }
             }
         }
         stage('Cleanup') {
             steps {
                 script {
-                    // Nettoyer l'environnement de test
-                    sh 'kubectl delete -f mysql-deployment.yaml'
-                    sh 'kubectl delete -f database-service.yaml'
+                    sh "docker exec kind-control-plane kubectl delete -f /database-deployment.yaml"
+                    sh "docker exec kind-control-plane kubectl delete -f /database-service.yaml"
                 }
             }
         }
