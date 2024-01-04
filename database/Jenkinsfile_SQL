@@ -20,11 +20,11 @@ pipeline {
                 script {
                     // Cloner le dépôt Git et copier les fichiers nécessaires
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/mysql-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/database-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
 
                     // Déployer un environnement de test pour MySQL
-                    sh 'kubectl apply -f mysql-deployment.yaml'
+                    sh 'kubectl apply -f database-deployment.yaml'
                     sh 'kubectl apply -f database-service.yaml'
                     sh 'sleep 30' // Attendre que MySQL soit prêt
                 }
