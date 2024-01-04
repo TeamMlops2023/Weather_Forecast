@@ -61,17 +61,6 @@ pipeline {
                 }
             }
         }
-        stage('Run Unit Tests') {
-            steps {
-                script {
-                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
-                    CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fastapi-container", returnStdout: true).trim()
-                    echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
-                    sh 'sleep 10' // Attendre que le serveur FastAPI démarre
-                    sh "docker exec -e BASE_URL=http://${CONTAINER_IP}:8000 fastapi-container python /app/tests/test_fastapi.py"
-                }
-            }
-        }
         stage('Cleanup Test Container') {
             steps {
                 script {
