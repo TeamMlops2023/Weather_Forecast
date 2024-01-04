@@ -7,15 +7,26 @@ pipeline {
         stage('Prepare Environment') {
             steps {
                 sh 'rm -rf Weather_Forecast'
+            }
+        }
+        stage('Get kind-Kubeconfig') {
+            steps {
                 sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Clone Repo and Copy Files') {
+        stage('Build and Push Database Image') {
             steps {
-                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
-                sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'docker build -t mlopsweather2023/database-image:latest ./database'
+                        echo 'Construction de l\'image Docker de la base de données réussie.'
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                        echo 'Connexion à Docker Hub réussie.'
+                        sh 'docker push mlopsweather2023/database-image:latest'
+                        echo 'Image Docker de la base de données poussée vers Docker Hub.'
+                    }
+                }
             }
         }
         stage('Setup and Test Database') {
@@ -31,26 +42,39 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Cleanup Test Container') {
             steps {
-                sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
-                sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
-                sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
+                script {
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    echo 'Arrêt et nettoyage du conteneur de test de base de données réussi.'
+                }
             }
         }
-        stage('Cleanup') {
+        stage('Clone Git Repo and Copy Deployment Files') {
             steps {
-                sh "docker exec kind-control-plane kubectl delete -f /database-deployment.yaml"
-                sh "docker exec kind-control-plane kubectl delete -f /database-service.yaml"
-                sh 'docker stop mysql-container || true'
-                sh 'docker rm mysql-container || true'
+                script {
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
+                }
+            }
+        }
+        stage('Deploy Database to Kubernetes') {
+            steps {
+                script {
+                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
+                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
+                    echo 'Déploiement de la base de données sur Kubernetes réussi.'
+                }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline terminée. Vérifiez les logs pour les détails.'
         }
     }
 }
