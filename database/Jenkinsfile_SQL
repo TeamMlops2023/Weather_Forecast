@@ -15,34 +15,11 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Cleanup Old MySQL Container') {
+        stage('Start Database') {
             steps {
                 script {
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
-                    echo 'Ancien conteneur MySQL nettoyé.'
-                }
-            }
-        }
-        stage('Build and Push MySQL Image') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'docker build -t mlopsweather2023/mysql-image:latest .'
-                        echo 'Construction de l\'image Docker MySQL réussie.'
-                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
-                        echo 'Connexion à Docker Hub réussie.'
-                        sh 'docker push mlopsweather2023/mysql-image:latest'
-                        echo 'Image Docker MySQL poussée vers Docker Hub.'
-                    }
-                }
-            }
-        }
-        stage('Start MySQL Container') {
-            steps {
-                script {
-                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword mlopsweather2023/mysql-image:latest'
-                    echo 'Conteneur MySQL démarré.'
+                    sh "docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather mysql:5.7"
+                    sh 'sleep 30' // Attendre que la base de données soit prête
                 }
             }
         }
@@ -73,9 +50,9 @@ pipeline {
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
-                    echo 'Arrêt et nettoyage du conteneur MySQL réussi.'
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
+                    echo 'Nettoyage du conteneur MySQL réussi.'
                 }
             }
         }
