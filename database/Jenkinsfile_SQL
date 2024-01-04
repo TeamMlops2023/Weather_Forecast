@@ -11,13 +11,17 @@ pipeline {
         }
         stage('Get kind-Kubeconfig') {
             steps {
-                // Arrêter et supprimer le conteneur existant s'il existe
-                sh 'docker stop mysql-container || true'
-                sh 'docker rm mysql-container || true'
-
-                // Démarrer un nouveau conteneur
-                sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword mlopsweather2023/mysql-image:latest'
-                echo 'Conteneur MySQL démarré.'
+                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
+                echo 'kind-Kubeconfig récupéré depuis GitHub.'
+            }
+        }
+        stage('Cleanup Old MySQL Container') {
+            steps {
+                script {
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    echo 'Ancien conteneur MySQL nettoyé.'
+                }
             }
         }
         stage('Build and Push MySQL Image') {
