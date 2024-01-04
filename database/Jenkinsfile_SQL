@@ -37,8 +37,7 @@ pipeline {
         stage('Run Database Tests') {
             steps {
                 script {
-                    // Ici, vous pouvez ajouter des commandes pour tester votre base de données
-                    // en utilisant `docker exec kind-control-plane kubectl ...`
+                    // Ici, ajoutez les commandes de test pour votre base de données
                 }
             }
         }
