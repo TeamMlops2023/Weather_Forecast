@@ -29,7 +29,7 @@ pipeline {
                 }
             }
         }
-        stage('Run and Test') {
+        stage('Run Unit Tests') {
             steps {
                 script {
                     sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
@@ -37,6 +37,31 @@ pipeline {
                     echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
                     sh 'sleep 10' // Attendre que le serveur FastAPI démarre
                     sh "docker exec -e BASE_URL=http://${CONTAINER_IP}:8000 fastapi-container python /app/tests/test_fastapi.py"
+                }
+            }
+        }
+        stage('Setup and Test Database') {
+            steps {
+                script {
+                    // Exécution des commandes MySQL à l'intérieur du conteneur
+                    sh """
+                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
+                    CREATE DATABASE IF NOT EXISTS mlops_weather;
+                    USE mlops_weather;
+                    CREATE TABLE IF NOT EXISTS weather_predictions (
+                        id INT PRIMARY KEY,
+                        date DATE,
+                        location VARCHAR(255),
+                        prediction INT,
+                        accuracy FLOAT
+                    );
+                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
+                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2017-05-08', 'Sydney', 1, 0.886467);
+                    SELECT * FROM weather_predictions;
+                    "
+                    """
                 }
             }
         }
@@ -69,31 +94,6 @@ pipeline {
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement sur Kubernetes réussi.'
-                }
-            }
-        }
-        stage('Setup and Test Database') {
-            steps {
-                script {
-                    // Exécution des commandes MySQL à l'intérieur du conteneur
-                    sh """
-                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
-                    CREATE DATABASE IF NOT EXISTS mlops_weather;
-                    USE mlops_weather;
-                    CREATE TABLE IF NOT EXISTS weather_predictions (
-                        id INT PRIMARY KEY,
-                        date DATE,
-                        location VARCHAR(255),
-                        prediction INT,
-                        accuracy FLOAT
-                    );
-                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
-                        (41054, '2017-05-08', 'Sydney', 1, 0.886467);
-                    SELECT * FROM weather_predictions;
-                    "
-                    """
                 }
             }
         }
