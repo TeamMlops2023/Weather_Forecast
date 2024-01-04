@@ -1,12 +1,12 @@
 pipeline {
     agent any
     environment {
-        KUBECONFIG = '/var/jenkins_home/.kube/config'
+        KUBECONFIG = '/var/jenkins_home/.kube/config' // Configuration de l'environnement pour Kubernetes
     }
     stages {
         stage('Prepare Environment') {
             steps {
-                sh 'rm -rf Weather_Forecast'
+                sh 'rm -rf Weather_Forecast' // Nettoyer le répertoire pour éviter tout conflit lors du clonage
             }
         }
         stage('Get kind-Kubeconfig') {
@@ -15,66 +15,88 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Build and Push Database Image') {
+        stage('Build and Push') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'docker build -t mlopsweather2023/database-image:latest ./database'
-                        echo 'Construction de l\'image Docker de la base de données réussie.'
+                        sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
+                        echo 'Construction de l\'image Docker réussie.'
                         sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
                         echo 'Connexion à Docker Hub réussie.'
-                        sh 'docker push mlopsweather2023/database-image:latest'
-                        echo 'Image Docker de la base de données poussée vers Docker Hub.'
+                        sh 'docker push mlopsweather2023/fastapi-image:latest'
+                        echo 'Image Docker poussée vers Docker Hub.'
                     }
                 }
             }
         }
-        stage('Setup and Test Database') {
+        stage('Run and Test') {
             steps {
                 script {
-                    // Exécution des tests de base de données ici
-                    // Par exemple, vous pouvez utiliser des commandes Docker pour exécuter des tests locaux
-                    sh 'docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword mysql:latest'
-                    sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS mlops_weather;"'
-                    sh 'docker exec mysql-container mysql -uroot -pmysecretpassword mlops_weather -e "CREATE TABLE IF NOT EXISTS weather_predictions (id INT PRIMARY KEY, date DATE, location VARCHAR(255), prediction INT, accuracy FLOAT);"'
-                    sh 'docker exec mysql-container mysql -uroot -pmysecretpassword mlops_weather -e "INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES (41053, '\''2016-04-16'\'', '\''Norfolk Island'\'', 0, 0.886467);"'
-                    sh 'docker exec mysql-container mysql -uroot -pmysecretpassword mlops_weather -e "SELECT * FROM weather_predictions;"'
+                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
+                    CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fastapi-container", returnStdout: true).trim()
+                    echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
+                    sh 'sleep 10' // Attendre que le serveur FastAPI démarre
+                    sh "docker exec -e BASE_URL=http://${CONTAINER_IP}:8000 fastapi-container python /app/tests/test_fastapi.py"
                 }
             }
         }
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
-                    echo 'Arrêt et nettoyage du conteneur de test de base de données réussi.'
+                    sh 'docker stop fastapi-container || true'
+                    sh 'docker rm fastapi-container || true'
+                    echo 'Arrêt et nettoyage du conteneur de test réussi.'
                 }
             }
         }
-        stage('Clone Git Repo and Copy Deployment Files') {
+        stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/fastapi/fastapi-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
                 }
             }
         }
-        stage('Deploy Database to Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
-                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
-                    echo 'Déploiement de la base de données sur Kubernetes réussi.'
+                    sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
+                    sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
+                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
+                    echo 'Déploiement sur Kubernetes réussi.'
+                }
+            }
+        }
+        stage('Setup and Test Database') {
+            steps {
+                script {
+                    // Exécution des commandes MySQL à l'intérieur du conteneur
+                    sh """
+                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
+                    CREATE DATABASE IF NOT EXISTS mlops_weather;
+                    USE mlops_weather;
+                    CREATE TABLE IF NOT EXISTS weather_predictions (
+                        id INT PRIMARY KEY,
+                        date DATE,
+                        location VARCHAR(255),
+                        prediction INT,
+                        accuracy FLOAT
+                    );
+                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
+                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
+                        (41054, '2017-05-08', 'Sydney', 1, 0.886467);
+                    SELECT * FROM weather_predictions;
+                    "
+                    """
                 }
             }
         }
     }
     post {
-        always {
-            echo 'Pipeline terminée. Vérifiez les logs pour les détails.'
-        }
-    }
-}
+        alway
