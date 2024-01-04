@@ -99,4 +99,8 @@ pipeline {
         }
     }
     post {
-        alway
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+        }
+    }
+}
