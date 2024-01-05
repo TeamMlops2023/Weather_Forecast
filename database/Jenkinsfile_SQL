@@ -15,19 +15,11 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Clone Git Repository') {
-            steps {
-                script {
-                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/database/init.sql .'
-                }
-            }
-        }
         stage('Build and Push MySQL Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        dir('Weather_Forecast/database') {
+                        dir('database') {
                             sh 'docker build -t mlopsweather2023/mysql-image:latest .'
                             echo 'Construction de l\'image Docker MySQL réussie.'
                         }
@@ -39,24 +31,34 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
+            steps {
+                script {
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes via Kind') {
             steps {
                 script {
                     sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
                     sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
+                    sh 'docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false'
+                    sh 'docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false'
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
             }
         }
-        stage('Exécuter le script SQL') {
+        stage('Initialiser la base de données') {
             steps {
                 script {
-                    sh "docker cp init.sql kind-control-plane:/init.sql"
-                    sh "docker exec kind-control-plane kubectl exec -i \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword < /init.sql"
+                    // Copier le fichier init.sql dans le conteneur kind-control-plane
+                    sh 'docker cp init.sql kind-control-plane:/init.sql'
+                    // Exécuter le script SQL à l'intérieur du conteneur de la base de données
+                    sh "docker exec kind-control-plane kubectl exec -it \$(docker exec kind-control-plane kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -u root -pmysecretpassword < /init.sql"
                 }
             }
         }
