@@ -54,20 +54,18 @@ pipeline {
                 }
             }
         }
-        stage('Initialize Database') {
+        stage('Interagir avec Kubernetes') {
             steps {
                 script {
-                    sh 'sleep 30' // Attendez que le conteneur MySQL soit prêt
-                    def mysqlPod = sh(script: "kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
-                    sh "kubectl cp ./database/init.sql ${mysqlPod}:/init.sql"
-                    sh "kubectl exec ${mysqlPod} -- mysql -u root -pmysecretpassword < /init.sql"
+                    sh "docker exec kind-control-plane kubectl get pods"
+                    // Ajoutez d'autres commandes kubectl si nécessaire
                 }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline MySQL terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
