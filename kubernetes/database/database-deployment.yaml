@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: database-container
-        image: mlopsweather2023/database-image:latest
+        image: mlopsweather2023/mysql-image:latest 
         ports:
         - containerPort: 3306
         env:
