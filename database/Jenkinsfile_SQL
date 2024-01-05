@@ -19,8 +19,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'docker build -t mlopsweather2023/mysql-image:latest ./database'
-                        echo 'Construction de l\'image Docker MySQL réussie.'
+                        // Changer le répertoire de travail à celui où se trouve le Dockerfile
+                        dir('database') {
+                            sh 'docker build -t mlopsweather2023/mysql-image:latest .'
+                            echo 'Construction de l\'image Docker MySQL réussie.'
+                        }
                         sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
                         echo 'Connexion à Docker Hub réussie.'
                         sh 'docker push mlopsweather2023/mysql-image:latest'
