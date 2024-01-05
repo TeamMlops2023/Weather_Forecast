@@ -15,11 +15,19 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
+        stage('Clone Git Repository') {
+            steps {
+                script {
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    sh 'cp Weather_Forecast/database/init.sql .'
+                }
+            }
+        }
         stage('Build and Push MySQL Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        dir('database') {
+                        dir('Weather_Forecast/database') {
                             sh 'docker build -t mlopsweather2023/mysql-image:latest .'
                             echo 'Construction de l\'image Docker MySQL réussie.'
                         }
@@ -28,16 +36,6 @@ pipeline {
                         sh 'docker push mlopsweather2023/mysql-image:latest'
                         echo 'Image Docker MySQL poussée vers Docker Hub.'
                     }
-                }
-            }
-        }
-        stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
-            steps {
-                script {
-                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
                 }
             }
         }
@@ -57,24 +55,15 @@ pipeline {
         stage('Exécuter le script SQL') {
             steps {
                 script {
-                    // Assurez-vous que le fichier init.sql est disponible dans l'environnement Jenkins
                     sh "docker cp init.sql kind-control-plane:/init.sql"
                     sh "docker exec kind-control-plane kubectl exec -i \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword < /init.sql"
-                }
-            }
-        }
-        stage('Interagir avec Kubernetes') {
-            steps {
-                script {
-                    sh "docker exec kind-control-plane kubectl get pods"
-                    // Ajoutez d'autres commandes kubectl si nécessaire
                 }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline MySQL terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
