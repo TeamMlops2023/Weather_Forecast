@@ -57,12 +57,13 @@ pipeline {
         stage('Initialiser la base de données') {
             steps {
                 script {
-                    // Copier le fichier init.sql du répertoire de base de données dans le conteneur kind-control-plane
+                    // Copier le fichier init.sql dans le conteneur kind-control-plane
                     sh 'docker cp database/init.sql kind-control-plane:/init.sql'
-                    // Récupérer le nom du pod de la base de données
+                    // Attendre que le pod soit prêt
+                    sh 'docker exec kind-control-plane kubectl wait --for=condition=ready pod -l app=database --timeout=60s'
+                    // Exécuter le script SQL sur le pod
                     POD_NAME = sh(script: "docker exec kind-control-plane kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
-                    // Exécuter le script SQL à l'intérieur du conteneur de la base de données
-                    sh "docker exec kind-control-plane kubectl exec -it ${POD_NAME} -- mysql -u root -pmysecretpassword < /init.sql"
+                    sh "docker exec kind-control-plane kubectl exec ${POD_NAME} -- mysql -uroot -pmysecretpassword mlops_weather < /init.sql"
                 }
             }
         }
