@@ -19,7 +19,6 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        // Changer le répertoire de travail à celui où se trouve le Dockerfile
                         dir('database') {
                             sh 'docker build -t mlopsweather2023/mysql-image:latest .'
                             echo 'Construction de l\'image Docker MySQL réussie.'
@@ -52,6 +51,16 @@ pipeline {
                     sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
+                }
+            }
+        }
+        stage('Initialize Database') {
+            steps {
+                script {
+                    sh 'sleep 30' // Attendez que le conteneur MySQL soit prêt
+                    def mysqlPod = sh(script: "kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    sh "kubectl cp ./database/init.sql ${mysqlPod}:/init.sql"
+                    sh "kubectl exec ${mysqlPod} -- mysql -u root -pmysecretpassword < /init.sql"
                 }
             }
         }
