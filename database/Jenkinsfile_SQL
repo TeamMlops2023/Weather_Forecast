@@ -41,13 +41,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes via Kind') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
                     sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
                     sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh 'docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false'
-                    sh 'docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false'
+                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
             }
@@ -55,12 +57,12 @@ pipeline {
         stage('Initialiser la base de données') {
             steps {
                 script {
-                    // Copier le fichier init.sql dans le répertoire de travail
-                    sh 'cp ./init.sql ./database/'
-                    // Copier le fichier init.sql dans le conteneur kind-control-plane
-                    sh 'docker cp ./database/init.sql kind-control-plane:/init.sql'
+                    // Copier le fichier init.sql du répertoire de base de données dans le conteneur kind-control-plane
+                    sh 'docker cp database/init.sql kind-control-plane:/init.sql'
+                    // Récupérer le nom du pod de la base de données
+                    POD_NAME = sh(script: "docker exec kind-control-plane kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
                     // Exécuter le script SQL à l'intérieur du conteneur de la base de données
-                    sh "docker exec kind-control-plane kubectl exec -it \$(docker exec kind-control-plane kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -u root -pmysecretpassword < /init.sql"
+                    sh "docker exec kind-control-plane kubectl exec -it ${POD_NAME} -- mysql -u root -pmysecretpassword < /init.sql"
                 }
             }
         }
