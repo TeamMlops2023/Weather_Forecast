@@ -15,44 +15,17 @@ pipeline {
                 echo 'kind-Kubeconfig récupéré depuis GitHub.'
             }
         }
-        stage('Start Database') {
+        stage('Build and Push MySQL Image') {
             steps {
                 script {
-                    sh "docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_DATABASE=mlops_weather mysql:5.7"
-                    sh 'sleep 30' // Attendre que la base de données soit prête
-                }
-            }
-        }
-        stage('Setup and Test Database') {
-            steps {
-                script {
-                    sh """
-                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
-                    CREATE DATABASE IF NOT EXISTS mlops_weather;
-                    USE mlops_weather;
-                    CREATE TABLE IF NOT EXISTS weather_predictions (
-                        id INT PRIMARY KEY,
-                        date DATE,
-                        location VARCHAR(255),
-                        prediction INT,
-                        accuracy FLOAT
-                    );
-                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
-                        (41055, '2017-05-08', 'Sydney', 1, 0.886467);
-                    SELECT * FROM weather_predictions;
-                    "
-                    """
-                }
-            }
-        }
-        stage('Cleanup Test Container') {
-            steps {
-                script {
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
-                    echo 'Nettoyage du conteneur MySQL réussi.'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'docker build -t mlopsweather2023/mysql-image:latest ./database'
+                        echo 'Construction de l\'image Docker MySQL réussie.'
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                        echo 'Connexion à Docker Hub réussie.'
+                        sh 'docker push mlopsweather2023/mysql-image:latest'
+                        echo 'Image Docker MySQL poussée vers Docker Hub.'
+                    }
                 }
             }
         }
