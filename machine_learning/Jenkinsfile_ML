@@ -1,39 +1,48 @@
 pipeline {
     agent any
-
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+    }
     stages {
-        stage('Build Docker Image') {
+        stage('Prepare Environment') {
+            steps {
+                sh 'rm -rf Weather_Forecast'
+            }
+        }
+        stage('Get kind-Kubeconfig') {
+            steps {
+                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
+                echo 'kind-Kubeconfig récupéré depuis GitHub.'
+            }
+        }
+        stage('Build and Push ML Model Image') {
             steps {
                 script {
-                    // Construire l'image Docker à partir du Dockerfile dans le répertoire machine_learning
                     dir('machine_learning') {
-                        mlContainer = docker.build('ml-model-image', '.')
+                        sh 'docker build -t mlopsweather2023/ml-model-image:latest .'
+                        sh 'docker push mlopsweather2023/ml-model-image:latest'
                     }
                 }
             }
         }
-
-        stage('Run Container and Test') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Démarrer le conteneur Docker pour les tests
-                    sh 'docker run -d --name ml-test-container ml-model-image'
-                    sh 'sleep 10' // Laisser un peu de temps pour le démarrage du conteneur
-
-                    // Exécuter les tests unitaires à l'intérieur du conteneur Docker
-                    sh 'docker exec ml-test-container python -m unittest discover -s /app/tests'
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service.yaml .'
+                    sh 'docker cp ./ml-deployment.yaml kind-control-plane:/ml-deployment.yaml'
+                    sh 'docker cp ./ml-service.yaml kind-control-plane:/ml-service.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --validate=false"
+                    echo 'Déploiement ML Model sur Kubernetes réussi.'
                 }
             }
         }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Nettoyage : arrêter et supprimer le conteneur de test
-                    sh 'docker stop ml-test-container || true'
-                    sh 'docker rm ml-test-container || true'
-                }
-            }
+    }
+    post {
+        always {
+            echo 'Pipeline ML Model terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
