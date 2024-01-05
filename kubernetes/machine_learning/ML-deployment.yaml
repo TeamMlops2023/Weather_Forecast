@@ -15,8 +15,6 @@ spec:
       containers:
       - name: ml-model
         image: mlopsweather2023/ml-model-image:latest
-        ports:
-        - containerPort: 80
         env:
         - name: MYSQL_HOST
           value: mysql-service
