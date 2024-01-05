@@ -54,6 +54,15 @@ pipeline {
                 }
             }
         }
+        stage('Exécuter le script SQL') {
+            steps {
+                script {
+                    // Assurez-vous que le fichier init.sql est disponible dans l'environnement Jenkins
+                    sh "docker cp init.sql kind-control-plane:/init.sql"
+                    sh "docker exec kind-control-plane kubectl exec -i \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword < /init.sql"
+                }
+            }
+        }
         stage('Interagir avec Kubernetes') {
             steps {
                 script {
