@@ -31,6 +31,14 @@ pipeline {
                 }
             }
         }
+        stage('Start MySQL Container') {
+            steps {
+                script {
+                    sh "docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest"
+                    sh 'sleep 30' // Attente pour s'assurer que MySQL est prêt
+                }
+            }
+        }
         stage('Setup and Test Database') {
             steps {
                 script {
@@ -50,7 +58,6 @@ pipeline {
                         (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
                         (41055, '2017-05-08', 'Sydney', 1, 0.886467);
                     SELECT * FROM weather_predictions;
-                    "
                     """
                 }
             }
