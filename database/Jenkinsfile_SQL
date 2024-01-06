@@ -71,13 +71,6 @@ pipeline {
                 }
             }
         }
-        stage('Delete Existing Deployment') {
-            steps {
-                script {
-                    sh "docker exec kind-control-plane kubectl delete deployment database-deployment || true"
-                }
-            }
-        }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
@@ -88,6 +81,16 @@ pipeline {
                     sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
+                }
+            }
+        }
+        stage('Initialize Database in Kubernetes') {
+            steps {
+                script {
+                    // Copier init.sql dans le pod de la base de données
+                    sh "kubectl cp database/init.sql \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'):/init.sql"
+                    // Exécuter init.sql dans le pod de la base de données
+                    sh "kubectl exec \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword -e 'source /init.sql'"
                 }
             }
         }
