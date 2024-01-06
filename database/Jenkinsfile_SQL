@@ -31,19 +31,13 @@ pipeline {
                 }
             }
         }
-        stage('Start MySQL Container') {
+        stage('Start MySQL Container and Initialize Database') {
             steps {
                 script {
                     sh 'docker stop mysql-container || true'
                     sh 'docker rm mysql-container || true'
                     sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
-                    sh 'sleep 30' // Attendez que le conteneur MySQL démarre complètement
-                }
-            }
-        }
-        stage('Setup and Initialize Database') {
-            steps {
-                script {
+                    sh 'sleep 30' // Attente pour le démarrage complet du conteneur MySQL
                     dir('database') {
                         sh 'docker cp ./init.sql mysql-container:/init.sql'
                         sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "source /init.sql"'
@@ -51,16 +45,6 @@ pipeline {
                 }
             }
         }
-        // Commentez cette étape pour garder le conteneur MySQL en vie après l'initialisation
-        // stage('Cleanup Test Container') {
-        //     steps {
-        //         script {
-        //             sh 'docker stop mysql-container || true'
-        //             sh 'docker rm mysql-container || true'
-        //             echo 'Nettoyage du conteneur MySQL réussi.'
-        //         }
-        //     }
-        // }
         stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
@@ -81,16 +65,6 @@ pipeline {
                     sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
                     echo 'Déploiement MySQL sur Kubernetes réussi.'
-                }
-            }
-        }
-        stage('Initialize Database in Kubernetes') {
-            steps {
-                script {
-                    // Copier init.sql dans le pod de la base de données
-                    sh "kubectl cp database/init.sql \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}'):/init.sql"
-                    // Exécuter init.sql dans le pod de la base de données
-                    sh "kubectl exec \$(kubectl get pods -l app=database -o jsonpath='{.items[0].metadata.name}') -- mysql -uroot -pmysecretpassword -e 'source /init.sql'"
                 }
             }
         }
