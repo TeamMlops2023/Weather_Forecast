@@ -71,6 +71,13 @@ pipeline {
                 }
             }
         }
+        stage('Delete Existing Deployment') {
+            steps {
+                script {
+                    sh "docker exec kind-control-plane kubectl delete deployment database-deployment || true"
+                }
+            }
+        }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
