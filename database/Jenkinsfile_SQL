@@ -51,15 +51,16 @@ pipeline {
                 }
             }
         }
-        stage('Cleanup Test Container') {
-            steps {
-                script {
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
-                    echo 'Nettoyage du conteneur MySQL réussi.'
-                }
-            }
-        }
+        // Commentez cette étape pour garder le conteneur MySQL en vie après l'initialisation
+        // stage('Cleanup Test Container') {
+        //     steps {
+        //         script {
+        //             sh 'docker stop mysql-container || true'
+        //             sh 'docker rm mysql-container || true'
+        //             echo 'Nettoyage du conteneur MySQL réussi.'
+        //         }
+        //     }
+        // }
         stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
