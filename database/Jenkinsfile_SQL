@@ -34,13 +34,10 @@ pipeline {
         stage('Start MySQL Container') {
             steps {
                 script {
-                    // Vérifiez si le conteneur existe déjà et arrêtez-le si nécessaire
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
-
-                    // Démarrer un nouveau conteneur MySQL
-                    sh "docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest"
-                    sh 'sleep 30' // Attente pour s'assurer que MySQL est prêt
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
+                    sh 'sleep 30' // Attente que le conteneur soit prêt
                 }
             }
         }
@@ -48,21 +45,21 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker exec mysql-container mysql -uroot -pmysecretpassword -e "
-                    "CREATE DATABASE IF NOT EXISTS mlops_weather;
-                    USE mlops_weather;
-                    CREATE TABLE IF NOT EXISTS weather_predictions (
-                        id INT PRIMARY KEY,
-                        date DATE,
-                        location VARCHAR(255),
-                        prediction INT,
-                        accuracy FLOAT
-                    );
-                    INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES
-                        (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467),
-                        (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467),
-                        (41055, '2017-05-08', 'Sydney', 1, 0.886467);
-                    SELECT * FROM weather_predictions;"
+                        docker exec mysql-container mysql -uroot -pmysecretpassword -e \\
+                        "CREATE DATABASE IF NOT EXISTS mlops_weather; \\
+                        USE mlops_weather; \\
+                        CREATE TABLE IF NOT EXISTS weather_predictions ( \\
+                            id INT PRIMARY KEY, \\
+                            date DATE, \\
+                            location VARCHAR(255), \\
+                            prediction INT, \\
+                            accuracy FLOAT \\
+                        ); \\
+                        INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES \\
+                            (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467), \\
+                            (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467), \\
+                            (41055, '2017-05-08', 'Sydney', 1, 0.886467); \\
+                        SELECT * FROM weather_predictions;"
                     """
                 }
             }
@@ -70,8 +67,8 @@ pipeline {
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
+                    sh 'docker stop mysql-container'
+                    sh 'docker rm mysql-container'
                     echo 'Nettoyage du conteneur MySQL réussi.'
                 }
             }
