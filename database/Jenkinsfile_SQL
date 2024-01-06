@@ -34,29 +34,28 @@ pipeline {
         stage('Start MySQL Container') {
             steps {
                 script {
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
-                    sh "docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest"
-                    sh "sleep 30" // Attendre que le conteneur démarre
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
+                    sh 'sleep 30' // Attendez que le conteneur MySQL démarre complètement
                 }
             }
         }
         stage('Setup and Initialize Database') {
             steps {
                 script {
-                    // Copiez init.sql dans le conteneur
-                    sh "docker cp ./database/init.sql mysql-container:/init.sql"
-
-                    // Exécutez init.sql à l'intérieur du conteneur
-                    sh "docker exec mysql-container mysql -uroot -pmysecretpassword < /init.sql"
+                    dir('database') {
+                        sh 'docker cp ./init.sql mysql-container:/init.sql'
+                        sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "source /init.sql"'
+                    }
                 }
             }
         }
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh "docker stop mysql-container || true"
-                    sh "docker rm mysql-container || true"
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
                     echo 'Nettoyage du conteneur MySQL réussi.'
                 }
             }
