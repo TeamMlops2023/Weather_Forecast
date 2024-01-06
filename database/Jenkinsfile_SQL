@@ -61,6 +61,7 @@ pipeline {
         stage('Cloner le Dépôt Git et Copier les Fichiers de Déploiement, Service et Ingress') {
             steps {
                 script {
+                    sh 'rm -rf Weather_Forecast'
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
                     sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
