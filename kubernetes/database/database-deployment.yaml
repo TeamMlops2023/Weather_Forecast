@@ -12,11 +12,47 @@ spec:
       labels:
         app: database
     spec:
-      containers:
-      - name: database-container
-        image: mlopsweather2023/mysql-image:latest 
-        ports:
-        - containerPort: 3306
+      initContainers:
+      - name: init-db
+        image: mlopsweather2023/mysql-image:latest
+        volumeMounts:
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "mysecretpassword" 
+          value: "mysecretpassword"
+      containers:
+      - name: mysql
+        image: mlopsweather2023/mysql-image:latest
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "mysecretpassword"
+      volumes:
+      - name: init-script
+        configMap:
+          name: mysql-init-script
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+data:
+  init.sql: |
+    -- Vérifiez si la base de données existe, sinon créez-la
+    CREATE DATABASE IF NOT EXISTS mlops_weather;
+    USE mlops_weather;
+
+    -- Créez la table weather_predictions si elle n'existe pas
+    CREATE TABLE IF NOT EXISTS weather_predictions (
+        id INT PRIMARY KEY,
+        date DATE,
+        location VARCHAR(255),
+        prediction INT,
+        accuracy FLOAT
+    );
