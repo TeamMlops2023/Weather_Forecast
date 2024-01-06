@@ -4,17 +4,6 @@ pipeline {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
     stages {
-        stage('Prepare Environment') {
-            steps {
-                sh 'rm -rf Weather_Forecast'
-            }
-        }
-        stage('Get kind-Kubeconfig') {
-            steps {
-                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
-                echo 'kind-Kubeconfig récupéré depuis GitHub.'
-            }
-        }
         stage('Build and Push MySQL Image') {
             steps {
                 script {
@@ -31,43 +20,18 @@ pipeline {
                 }
             }
         }
-        stage('Start MySQL Container') {
+        stage('Setup and Initialize Database') {
             steps {
                 script {
                     sh 'docker stop mysql-container || true'
                     sh 'docker rm mysql-container || true'
                     sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
                     sh 'sleep 30' // Attendez que le conteneur MySQL démarre complètement
-                }
-            }
-        }
-        stage('Setup and Initialize Database') {
-            steps {
-                script {
                     dir('database') {
                         sh 'docker cp ./init.sql mysql-container:/init.sql'
                         sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "source /init.sql"'
+                        echo 'Initialisation de la base de données réussie.'
                     }
-                }
-            }
-        }
-        stage('Delete Existing Kubernetes Deployment') {
-            steps {
-                script {
-                    sh "docker exec kind-control-plane kubectl delete deployment database-deployment || true"
-                }
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
-                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
-                    echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
             }
         }
