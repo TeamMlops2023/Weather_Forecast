@@ -34,41 +34,29 @@ pipeline {
         stage('Start MySQL Container') {
             steps {
                 script {
-                    sh 'docker stop mysql-container || true'
-                    sh 'docker rm mysql-container || true'
-                    sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
-                    sh 'sleep 30' // Attente que le conteneur soit prêt
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
+                    sh "docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest"
+                    sh "sleep 30" // Attendre que le conteneur démarre
                 }
             }
         }
-        stage('Setup and Test Database') {
+        stage('Setup and Initialize Database') {
             steps {
                 script {
-                    sh """
-                        docker exec mysql-container mysql -uroot -pmysecretpassword -e \\
-                        "CREATE DATABASE IF NOT EXISTS mlops_weather; \\
-                        USE mlops_weather; \\
-                        CREATE TABLE IF NOT EXISTS weather_predictions ( \\
-                            id INT PRIMARY KEY, \\
-                            date DATE, \\
-                            location VARCHAR(255), \\
-                            prediction INT, \\
-                            accuracy FLOAT \\
-                        ); \\
-                        INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES \\
-                            (41053, '2016-04-16', 'Norfolk Island', 0, 0.886467), \\
-                            (41054, '2016-04-17', 'Norfolk Island', 0, 0.886467), \\
-                            (41055, '2017-05-08', 'Sydney', 1, 0.886467); \\
-                        SELECT * FROM weather_predictions;"
-                    """
+                    // Copiez init.sql dans le conteneur
+                    sh "docker cp ./database/init.sql mysql-container:/init.sql"
+
+                    // Exécutez init.sql à l'intérieur du conteneur
+                    sh "docker exec mysql-container mysql -uroot -pmysecretpassword < /init.sql"
                 }
             }
         }
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh 'docker stop mysql-container'
-                    sh 'docker rm mysql-container'
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
                     echo 'Nettoyage du conteneur MySQL réussi.'
                 }
             }
