@@ -34,6 +34,11 @@ pipeline {
         stage('Start MySQL Container') {
             steps {
                 script {
+                    // Vérifiez si le conteneur existe déjà et arrêtez-le si nécessaire
+                    sh "docker stop mysql-container || true"
+                    sh "docker rm mysql-container || true"
+
+                    // Démarrer un nouveau conteneur MySQL
                     sh "docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest"
                     sh 'sleep 30' // Attente pour s'assurer que MySQL est prêt
                 }
