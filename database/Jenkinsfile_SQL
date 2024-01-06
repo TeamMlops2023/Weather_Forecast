@@ -4,6 +4,17 @@ pipeline {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
     stages {
+        stage('Prepare Environment') {
+            steps {
+                sh 'rm -rf Weather_Forecast'
+            }
+        }
+        stage('Get kind-Kubeconfig') {
+            steps {
+                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
+                echo 'kind-Kubeconfig récupéré depuis GitHub.'
+            }
+        }
         stage('Build and Push MySQL Image') {
             steps {
                 script {
@@ -20,21 +31,43 @@ pipeline {
                 }
             }
         }
-        stage('Setup and Initialize Database') {
+        stage('Start MySQL Container') {
             steps {
                 script {
                     sh 'docker stop mysql-container || true'
                     sh 'docker rm mysql-container || true'
                     sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
                     sh 'sleep 30' // Attendez que le conteneur MySQL démarre complètement
+                }
+            }
+        }
+        stage('Setup and Initialize Database') {
+            steps {
+                script {
                     dir('database') {
                         sh 'docker cp ./init.sql mysql-container:/init.sql'
                         sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "source /init.sql"'
-                        echo 'Initialisation de la base de données réussie.'
                     }
                 }
             }
         }
+        stage('Insert Data into Database') {
+            steps {
+                script {
+                    sh """
+                        docker exec mysql-container mysql -uroot -pmysecretpassword -e "
+                        USE mlops_weather;
+                        INSERT INTO weather_predictions (id, date, location, prediction, accuracy) VALUES 
+                        (1, '2024-01-01', 'Paris', 75, 0.95),
+                        (2, '2024-01-02', 'New York', 65, 0.90),
+                        (3, '2024-01-03', 'Tokyo', 80, 0.93);
+                        "
+                    """
+                    echo 'Insertion des données réussie.'
+                }
+            }
+        }
+        // ... Ajoutez ici les étapes suivantes si nécessaire
     }
     post {
         always {
