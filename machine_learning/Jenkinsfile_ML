@@ -25,7 +25,7 @@ pipeline {
                 script {
                     // Créer un conteneur temporaire pour exécuter les tests
                     sh 'docker run --name ml-model-test-container -d mlopsweather2023/ml-model-image:latest'
-                    sh 'docker exec ml-model-test-container python /Weather_Forecast/machine_learning/tests/test_modele.py'
+                    sh 'docker exec ml-model-test-container python /app/tests/test_modele.py'
                     sh 'docker stop ml-model-test-container'
                     sh 'docker rm ml-model-test-container'
                 }
