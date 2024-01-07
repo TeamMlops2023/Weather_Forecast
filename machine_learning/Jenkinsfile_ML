@@ -61,6 +61,14 @@ pipeline {
                 }
             }
         }
+        stage('Wait for Pod Initialization') {
+            steps {
+                script {
+                    echo "Attente pour l'initialisation du pod..."
+                    sh 'sleep 60' // Attente de 60 secondes
+                }
+            }
+        }
         stage('Execute ML Script') {
             steps {
                 script {
@@ -68,7 +76,7 @@ pipeline {
                     def podName = sh(script: "docker exec kind-control-plane kubectl get pods -l app=ml-model -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
                     echo "Le nom du pod ML Model est : ${podName}"
 
-                    // Exécuter le script dans le conteneur spécifique du pod
+                    // Exécuter le script dans le conteneur du pod
                     sh "docker exec kind-control-plane kubectl exec ${podName} -c ml-model -- python /app/modele.py"
                 }
             }
