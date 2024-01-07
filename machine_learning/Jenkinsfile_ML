@@ -68,8 +68,8 @@ pipeline {
                     def podName = sh(script: "docker exec kind-control-plane kubectl get pods -l app=ml-model -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
                     echo "Le nom du pod ML Model est : ${podName}"
 
-                    // Exécuter le script dans le pod
-                    sh "docker exec kind-control-plane kubectl exec -it ${podName} -- python /Weather_Forecast/machine_learning/modele.py"
+                    // Exécuter le script dans le conteneur spécifique du pod
+                    sh "docker exec kind-control-plane kubectl exec ${podName} -c ml-model -- python /app/modele.py"
                 }
             }
         }
