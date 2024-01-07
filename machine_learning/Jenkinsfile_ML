@@ -64,8 +64,12 @@ pipeline {
         stage('Execute ML Script') {
             steps {
                 script {
-                    // Exécutez le script de modèle ML pour remplir la base de données
-                    sh "docker exec kind-control-plane kubectl exec -it [nom_pod_ml_model] -- python /Weather_Forecast/machine_learning/modele.py"
+                    // Obtenir le nom du pod
+                    def podName = sh(script: "docker exec kind-control-plane kubectl get pods -l app=ml-model -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    echo "Le nom du pod ML Model est : ${podName}"
+
+                    // Exécuter le script dans le pod
+                    sh "docker exec kind-control-plane kubectl exec -it ${podName} -- python /Weather_Forecast/machine_learning/modele.py"
                 }
             }
         }
