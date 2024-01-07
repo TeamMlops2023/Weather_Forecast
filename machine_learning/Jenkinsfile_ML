@@ -4,9 +4,10 @@ pipeline {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
     stages {
-        stage('Prepare Environment') {
+        stage('Clone Repository') {
             steps {
                 sh 'rm -rf Weather_Forecast'
+                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
         stage('Build ML Model Image') {
@@ -44,7 +45,6 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
                     sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service.yaml .'
                     sh 'docker cp ./ml-deployment.yaml kind-control-plane:/ml-deployment.yaml'
