@@ -12,7 +12,7 @@ pipeline {
         stage('Build ML Model Image') {
             steps {
                 script {
-                    dir('machine_learning') {
+                    dir('Weather_Forecast/machine_learning') {
                         sh 'docker build -t mlopsweather2023/ml-model-image:latest .'
                         echo 'Construction de l\'image Docker ML Model réussie.'
                     }
@@ -24,7 +24,7 @@ pipeline {
                 script {
                     // Créer un conteneur temporaire pour exécuter les tests
                     sh 'docker run --name ml-model-test-container -d mlopsweather2023/ml-model-image:latest'
-                    sh 'docker exec ml-model-test-container python /path/to/your/test_script.py'
+                    sh 'docker exec ml-model-test-container python /Weather_Forecast/machine_learning/tests/test_modele.py'
                     sh 'docker stop ml-model-test-container'
                     sh 'docker rm ml-model-test-container'
                 }
@@ -59,7 +59,7 @@ pipeline {
             steps {
                 script {
                     // Exécutez le script de modèle ML pour remplir la base de données
-                    sh "docker exec kind-control-plane kubectl exec -it [nom_pod_ml_model] -- python /path/to/your/modele.py"
+                    sh "docker exec kind-control-plane kubectl exec -it [nom_pod_ml_model] -- python /Weather_Forecast/machine_learning/modele.py"
                 }
             }
         }
