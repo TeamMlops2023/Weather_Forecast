@@ -19,7 +19,7 @@ while attempt_count < max_attempts:
     try:
         # Connexion à la base de données
         db = mysql.connector.connect(
-            host="mysql",
+            host="database-service",
             user="root",
             password="mysecretpassword",
             database="mlops_weather"
