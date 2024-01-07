@@ -9,18 +9,34 @@ pipeline {
                 sh 'rm -rf Weather_Forecast'
             }
         }
-        stage('Get kind-Kubeconfig') {
-            steps {
-                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
-                echo 'kind-Kubeconfig récupéré depuis GitHub.'
-            }
-        }
-        stage('Build and Push ML Model Image') {
+        stage('Build ML Model Image') {
             steps {
                 script {
                     dir('machine_learning') {
                         sh 'docker build -t mlopsweather2023/ml-model-image:latest .'
+                        echo 'Construction de l\'image Docker ML Model réussie.'
+                    }
+                }
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Créer un conteneur temporaire pour exécuter les tests
+                    sh 'docker run --name ml-model-test-container -d mlopsweather2023/ml-model-image:latest'
+                    sh 'docker exec ml-model-test-container python /path/to/your/test_script.py'
+                    sh 'docker stop ml-model-test-container'
+                    sh 'docker rm ml-model-test-container'
+                }
+            }
+        }
+        stage('Push ML Model Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
                         sh 'docker push mlopsweather2023/ml-model-image:latest'
+                        echo 'Image Docker ML Model poussée vers Docker Hub.'
                     }
                 }
             }
@@ -36,6 +52,14 @@ pipeline {
                     sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --validate=false"
                     sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --validate=false"
                     echo 'Déploiement ML Model sur Kubernetes réussi.'
+                }
+            }
+        }
+        stage('Execute ML Script') {
+            steps {
+                script {
+                    // Exécutez le script de modèle ML pour remplir la base de données
+                    sh "docker exec kind-control-plane kubectl exec -it [nom_pod_ml_model] -- python /path/to/your/modele.py"
                 }
             }
         }
