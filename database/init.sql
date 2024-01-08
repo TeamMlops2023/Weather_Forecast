@@ -4,7 +4,7 @@ USE mlops_weather;
 
 -- Créez la table weather_predictions si elle n'existe pas
 CREATE TABLE IF NOT EXISTS weather_predictions (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     date DATE,
     location VARCHAR(255),
     prediction INT,
