@@ -18,11 +18,12 @@ spec:
         image: mlopsweather2023/fastapi-image:latest
         ports:
         - containerPort: 8000
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/sh
-              - -c
-              - |
-                kubectl port-forward deployment/fastapi-deployment 8082:8000
+        
+        #lifecycle:
+         # postStart:
+          #  exec:
+           #   command:
+            #  - /bin/sh
+             # - -c
+              # - |
+                # kubectl port-forward deployment/fastapi-deployment 8082:8000
