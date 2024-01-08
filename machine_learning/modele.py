@@ -67,8 +67,8 @@ for i in range(len(predictions)):
     city = df.iloc[i]['location']
     predicted = predictions[i].item()  # Convertit numpy.int64 en int
     accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
-    insert_query = "INSERT INTO weather_predictions (date, city, predicted, accuracy) VALUES (%s, %s, %s, %s)"
-    cursor.execute(insert_query, (date, city, predicted, accuracy))
+    insert_query = "INSERT INTO weather_predictions (date, location, predicted, accuracy) VALUES (%s, %s, %s, %s)"
+    cursor.execute(insert_query, (date, location, predicted, accuracy))
 
 # Commit des modifications dans la base de données
 db.commit()
