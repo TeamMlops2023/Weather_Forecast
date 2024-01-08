@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     dir('database') {
-                        sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "INSERT INTO mlops_weather.weather_predictions (id, date, location, prediction, accuracy) VALUES (1, \'2024-01-01\', \'Paris\', 75, 0.95), (2, \'2024-01-02\', \'New York\', 65, 0.9), (3, \'2024-01-03\', \'Tokyo\', 80, 0.93);"'
+                        sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "INSERT INTO mlops_weather.weather_predictions (id, date, city, prediction, accuracy) VALUES (1, \'2024-01-01\', \'Paris\', 75, 0.95), (2, \'2024-01-02\', \'New York\', 65, 0.9), (3, \'2024-01-03\', \'Tokyo\', 80, 0.93);"'
                     }
                 }
             }
