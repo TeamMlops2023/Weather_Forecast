@@ -26,8 +26,8 @@ spec:
           value: "mlops_weather"
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
+            memory: "4Gi"
             cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "2000m"
