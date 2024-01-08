@@ -6,7 +6,7 @@ USE mlops_weather;
 CREATE TABLE IF NOT EXISTS weather_predictions (
     id INT PRIMARY KEY,
     date DATE,
-    location VARCHAR(255),
+    city VARCHAR(255),
     prediction INT,
     accuracy FLOAT
 );
