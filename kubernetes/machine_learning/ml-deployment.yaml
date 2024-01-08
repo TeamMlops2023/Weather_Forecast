@@ -13,21 +13,14 @@ spec:
         app: ml-model
     spec:
       containers:
-      - name: ml-model
-        image: mlopsweather2023/ml-model-image:latest
-        env:
-        - name: MYSQL_HOST
-          value: mysql-service
-        - name: MYSQL_USER
-          value: "root"
-        - name: MYSQL_PASSWORD
-          value: "mysecretpassword"
-        - name: MYSQL_DATABASE
-          value: "mlops_weather"
-        resources:
-          requests:
-            memory: "8Gi"
-            cpu: "2000m"
-          limits:
-            memory: "12Gi"
-            cpu: "4000m"
+        - name: ml-model
+          image: mlopsweather2023/ml-model-image:latest
+          env:
+            - name: MYSQL_HOST
+              value: mysql-service
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              value: "mysecretpassword"
+            - name: MYSQL_DATABASE
+              value: "mlops_weather"
