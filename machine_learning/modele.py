@@ -64,7 +64,7 @@ predictions = model.predict(X_test)
 # Insertion des prédictions dans la base de données au fur et à mesure qu'elles sont générées
 for i in range(len(predictions)):
     date = df.iloc[i]['date']
-    city = df.iloc[i]['location']
+    location = df.iloc[i]['location']
     predicted = predictions[i].item()  # Convertit numpy.int64 en int
     accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
     insert_query = "INSERT INTO weather_predictions (date, location, predicted, accuracy) VALUES (%s, %s, %s, %s)"
