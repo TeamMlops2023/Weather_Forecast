@@ -30,16 +30,6 @@ pipeline {
                 }
             }
         }
-        stage('Setup and Initialize Database') {
-            steps {
-                script {
-                    dir('database') {
-                        sh 'docker cp ./init.sql mysql-container:/init.sql'
-                        sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "source /init.sql"'
-                    }
-                }
-            }
-        }
         stage('Insert Data into Database') {
             steps {
                 script {
