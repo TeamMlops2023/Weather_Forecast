@@ -4,4 +4,11 @@ metadata:
   name: prometheus-config
 data:
   prometheus.yml: |
-    # Contenu de votre fichier prometheus.yml
+    global:
+  scrape_interval: 15s  # Par défaut, scrape toutes les 15 secondes.
+
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+
