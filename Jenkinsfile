@@ -12,7 +12,7 @@ pipeline {
                 }
             }
         }
-        stage('Pause') {
+        stage('Pause After FastAPI') {
             steps {
                 script {
                     // Pause de 30 secondes
@@ -28,7 +28,7 @@ pipeline {
                 }
             }
         }
-        stage('Pause') {
+        stage('Pause After SQL') {
             steps {
                 script {
                     // Pause de 30 secondes
