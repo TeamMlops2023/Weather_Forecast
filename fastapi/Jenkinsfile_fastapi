@@ -9,12 +9,8 @@ pipeline {
                 sh 'rm -rf Weather_Forecast' // Nettoyer le répertoire pour éviter tout conflit lors du clonage
             }
         }
-        stage('Get kind-Kubeconfig') {
-            steps {
-                sh 'curl -LJO https://github.com/TeamMlops2023/Weather_Forecast/raw/BAS_ALAIN/kubernetes/kind-kubeconfig'
-                echo 'kind-Kubeconfig récupéré depuis GitHub.'
-            }
-        }
+        
+
         stage('Build and Push') {
             steps {
                 script {
@@ -65,9 +61,9 @@ pipeline {
                     sh 'docker cp ./fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
                     sh 'docker cp ./fastapi-service.yaml kind-control-plane:/fastapi-service.yaml'
                     sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml"
                     echo 'Déploiement sur Kubernetes réussi.'
                 }
             }
