@@ -1,0 +1,21 @@
+Composants du Projet
+
+Dockerfile
+Construit une image Docker pour l'application FastAPI en utilisant Python 3.8-slim comme base.
+Installe les dépendances requises et expose le port 8000 pour l'application FastAPI.
+
+Jenkinsfile
+Gère le pipeline CI/CD, y compris le clonage de code, la construction de l'image Docker, les tests, et le déploiement sur Kubernetes.
+Utilise des secrets pour les identifiants Docker Hub et gère les étapes de nettoyage.
+
+Application FastAPI (main.py)
+Implémente une application FastAPI avec plusieurs endpoints (/, /status, /echo) pour des opérations de base.
+Intègre des tests unitaires pour valider les fonctionnalités de l'API.
+
+Fichiers de Test
+Contient des tests unitaires pour vérifier le bon fonctionnement des endpoints de FastAPI.
+Fichiers YAML Kubernetes
+
+ingress.yaml: Configure l'ingress pour exposer le service FastAPI.
+fastapi-deployment.yaml: Définit un déploiement Kubernetes pour l'application FastAPI.
+fastapi-service.yaml: Crée un service Kubernetes pour gérer l'accès à l'application FastAPI.
