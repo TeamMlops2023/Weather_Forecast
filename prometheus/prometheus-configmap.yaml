@@ -1,3 +1,4 @@
+prometheus-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,3 +12,16 @@ data:
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
+
+      # Ajoutez des cibles de collecte pour vos services ici
+      - job_name: 'mysql-service'
+        static_configs:
+          - targets: ['mysql-service:3306']
+
+      - job_name: 'fastapi-service'
+        static_configs:
+          - targets: ['fastapi-service:8000']
+
+      - job_name: 'ml-model-service'
+        static_configs:
+          - targets: ['ml-model-service:80']
