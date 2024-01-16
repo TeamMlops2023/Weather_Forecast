@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
-import joblib
 
 app = FastAPI()
-
-# Charger le modèle entraîné
-model = joblib.load("/app/data/modele_entraîné.pkl")
 
 # Définition de l'endpoint racine ("/")
 @app.get("/")
@@ -24,19 +20,7 @@ def get_status():
 def echo(text: str = Query(None, min_length=1, max_length=100)):
     # Valide le paramètre de requête et le renvoie dans une réponse JSON
     return {"echo": text}
-
-@app.post("/predict")
-async def predict(request: Request):
-    # Récupérer les données de la requête
-    data = await request.json()
-    
-    # Supposons que data est un dictionnaire qui contient les données nécessaires pour votre modèle
-    # Par exemple: data = {"feature1": value1, "feature2": value2, ...}
-    
-    # Convertir les données en format approprié pour votre modèle
-    # Par exemple, si votre modèle attend un DataFrame pandas
-    # input_data = pd.DataFrame([data])
-    
+   
     # Faire la prédiction
     prediction = model.predict(input_data)
 
