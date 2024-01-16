@@ -1,0 +1,21 @@
+Composants du Projet
+
+Dockerfile
+Construit une image Docker pour l'application de machine learning en utilisant Python 3.8-slim comme base.
+Installe les dépendances requises, copie les scripts nécessaires, et définit la commande pour exécuter le service Flask.
+
+Jenkinsfile
+Gère le pipeline CI/CD pour le projet de machine learning, y compris les étapes de clonage de code, construction de l'image Docker, exécution des tests, et déploiement sur Kubernetes.
+Utilise des secrets pour les identifiants Docker Hub et gère les étapes de nettoyage après les tests et le déploiement.
+
+Application de Machine Learning (modele.py)
+Implémente un modèle de machine learning utilisant scikit-learn pour la prévision météorologique.
+Connecte à une base de données MySQL, traite les données, entraîne un modèle RandomForestClassifier, et stocke les prédictions dans la base de données.
+
+Fichiers de Test
+Contient des tests unitaires pour vérifier la précision et le fonctionnement du modèle de machine learning.
+
+Fichiers YAML Kubernetes
+ml-deployment.yaml: Définit un déploiement Kubernetes pour le modèle de machine learning.
+ml-service.yaml: Crée un service Kubernetes pour gérer l'accès au modèle de machine learning.
+mysql-service.yaml: Configure un service Kubernetes pour la base de données MySQL, nécessaire au fonctionnement du modèle.
