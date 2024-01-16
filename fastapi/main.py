@@ -1,8 +1,11 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 import uvicorn
+import joblib
 
-# Création d'une instance FastAPI
 app = FastAPI()
+
+# Charger le modèle entraîné
+model = joblib.load("/app/data/modele_entraîné.pkl")
 
 # Définition de l'endpoint racine ("/")
 @app.get("/")
