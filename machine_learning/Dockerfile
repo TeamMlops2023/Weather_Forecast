@@ -13,8 +13,5 @@ COPY modele.py .
 COPY data/ data/
 COPY tests/ tests/
 
-# Copier le modèle entraîné dans l'image
-COPY data/modele_entraîné.pkl /app/data/modele_entraîné.pkl
-
 # Définissez la commande pour exécuter le service 
 CMD ["python", "modele.py"]
