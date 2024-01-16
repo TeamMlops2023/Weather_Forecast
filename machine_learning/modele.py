@@ -58,6 +58,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
+# Sauvegarder le modèle entraîné
+chemin_sauvegarde_modele = os.path.join('data', 'modele_entraîné.pkl')  # Sauvegarde dans le sous-dossier 'data'
+joblib.dump(model, chemin_sauvegarde_modele)
+print(f"Modèle sauvegardé sous : {chemin_sauvegarde_modele}")
+
 # Prédiction
 predictions = model.predict(X_test)
 
