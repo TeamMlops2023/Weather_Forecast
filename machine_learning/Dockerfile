@@ -13,5 +13,5 @@ COPY modele.py .
 COPY data/ data/
 COPY tests/ tests/
 
-# Définissez la commande pour exécuter le service Flask
+# Définissez la commande pour exécuter le service 
 CMD ["python", "modele.py"]
