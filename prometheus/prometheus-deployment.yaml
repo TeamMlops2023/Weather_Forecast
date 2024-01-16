@@ -12,7 +12,7 @@ spec:
       labels:
         app: prometheus
     spec:
-      serviceAccountName: prometheus  # Ajoutez cette ligne
+      serviceAccountName: prometheus
       containers:
         - name: prometheus
           image: prom/prometheus
