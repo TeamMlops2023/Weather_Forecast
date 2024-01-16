@@ -1,0 +1,24 @@
+Dockerfile pour MySQL
+Utilise l'image officielle MySQL 5.7 de Docker Hub.
+Définit les variables pour la configuration de MySQL, y compris les détails de l'utilisateur et de la base de données.
+Copie le script init.sql pour initialiser la base de données à la première exécution du conteneur.
+Expose le port 3306, pour permettre la connexion à la base de données.
+
+Jenkinsfile pour la Base de Données
+Construit une image Docker pour MySQL et la pousse vers Docker Hub.
+Gère le démarrage et l'arrêt d'un conteneur MySQL pour les tests.
+Exécute un script pour insérer des données de test dans la base de données MySQL.
+Assure le nettoyage du conteneur MySQL après les tests.
+Copie et applique les fichiers de déploiement et de service Kubernetes pour MySQL.
+
+Fichiers d'Initialisation SQL (init.sql)
+Création de la Base de Données : Vérifie l'existence de la base de données mlops_weather et la crée si nécessaire.
+Création de Table : Crée la table weather_predictions pour stocker les prédictions météorologiques.
+Fichier de Test pour la Base de Données
+
+Tests de Connexion : Teste la connexion à la base de données MySQL.
+Création de Table et Insertion de Données : Vérifie la création de la table et l'insertion de données dans la base de données.
+
+Fichiers YAML Kubernetes pour la Base de Données
+database-deployment.yaml : Configure un déploiement Kubernetes pour le service MySQL.
+database-service.yaml : Définit un service Kubernetes pour exposer MySQL au sein du cluster.
