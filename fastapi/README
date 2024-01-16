@@ -14,8 +14,8 @@ Intègre des tests unitaires pour valider les fonctionnalités de l'API.
 
 Fichiers de Test
 Contient des tests unitaires pour vérifier le bon fonctionnement des endpoints de FastAPI.
-Fichiers YAML Kubernetes
 
+Fichiers YAML Kubernetes
 ingress.yaml: Configure l'ingress pour exposer le service FastAPI.
 fastapi-deployment.yaml: Définit un déploiement Kubernetes pour l'application FastAPI.
 fastapi-service.yaml: Crée un service Kubernetes pour gérer l'accès à l'application FastAPI.
