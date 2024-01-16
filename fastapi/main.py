@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 import uvicorn
 
+# Création d'une instance FastAPI
 app = FastAPI()
 
 # Définition de l'endpoint racine ("/")
@@ -20,12 +21,6 @@ def get_status():
 def echo(text: str = Query(None, min_length=1, max_length=100)):
     # Valide le paramètre de requête et le renvoie dans une réponse JSON
     return {"echo": text}
-   
-    # Faire la prédiction
-    prediction = model.predict(input_data)
-
-    # Renvoyer la prédiction
-    return {"prediction": prediction.tolist()}
 
 # Vérifie si le script est exécuté en tant que fichier principal
 if __name__ == "__main__":
