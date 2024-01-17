@@ -6,37 +6,39 @@ pipeline {
     }
 
     stages {
-        stage('Nettoyer et Cloner le Dépôt Git') {
+        stage('Initialisation') {
             steps {
                 script {
-                    sh 'rm -rf Weather_Forecast'
-                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    // Ajout des dépôts Helm
+                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                    sh 'helm repo add grafana https://grafana.github.io/helm-charts'
+                    sh 'helm repo update'
                 }
             }
         }
-
         stage('Déployer Prometheus') {
             steps {
                 script {
-                    sh 'helm upgrade --install prometheus prometheus-community/prometheus -f values.yaml --namespace monitoring'
-                    echo 'Déploiement de Prometheus réussi.'
+                    // Déploiement de Prometheus avec le fichier values.yaml personnalisé
+                    sh 'helm upgrade --install prometheus prometheus-community/prometheus -f ./monitoring/values.yaml --namespace monitoring --create-namespace'
                 }
             }
         }
-
         stage('Déployer Grafana') {
             steps {
                 script {
-                    sh 'helm upgrade --install grafana grafana/grafana -f grafana-values.yaml --namespace monitoring'
-                    echo 'Déploiement de Grafana réussi.'
+                    // Déploiement de Grafana avec le fichier grafana-values.yaml personnalisé
+                    sh 'helm upgrade --install grafana grafana/grafana -f ./monitoring/grafana-values.yaml --namespace monitoring --create-namespace'
                 }
             }
         }
-    }
-
-    post {
-        always {
-            echo 'Pipeline de déploiement de monitoring terminé. Vérifiez les logs pour les détails.'
+        stage('Vérification') {
+            steps {
+                script {
+                    // Vérifier l'état des pods dans le namespace monitoring
+                    sh 'kubectl get pods -n monitoring'
+                }
+            }
         }
     }
 }
