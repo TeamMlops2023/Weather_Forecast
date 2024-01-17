@@ -18,7 +18,7 @@ pipeline {
         stage('Deploy Prometheus') {
             steps {
                 script {
-                    sh "docker exec kind-control-plane helm upgrade --install prometheus prometheus-community/prometheus -f values.yaml --namespace monitoring"
+                    sh 'helm upgrade --install prometheus prometheus-community/prometheus -f values.yaml --namespace monitoring'
                     echo 'Déploiement de Prometheus réussi.'
                 }
             }
@@ -27,7 +27,7 @@ pipeline {
         stage('Deploy Grafana') {
             steps {
                 script {
-                    sh "docker exec kind-control-plane helm upgrade --install grafana grafana/grafana -f grafana-values.yaml --namespace monitoring"
+                    sh 'helm upgrade --install grafana grafana/grafana -f grafana-values.yaml --namespace monitoring'
                     echo 'Déploiement de Grafana réussi.'
                 }
             }
