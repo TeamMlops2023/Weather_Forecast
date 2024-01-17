@@ -4,9 +4,10 @@ pipeline {
         KUBECONFIG = '/var/jenkins_home/.kube/config' // Configuration de l'environnement pour Kubernetes
     }
     stages {
-        stage('Cloner le Dépôt Git et Copier les Fichiers de Configuration') {
+        stage('Nettoyer et Cloner le Dépôt Git') {
             steps {
                 script {
+                    sh 'rm -rf Weather_Forecast' // Nettoyer le répertoire avant le clonage
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
                     sh 'cp Weather_Forecast/monitoring/grafana-values.yaml .'
                     sh 'cp Weather_Forecast/monitoring/values.yaml .'
@@ -35,6 +36,4 @@ pipeline {
     post {
         always {
             echo 'Pipeline de déploiement de monitoring terminé. Vérifiez les logs pour les détails.'
-        }
-    }
-}
+       
