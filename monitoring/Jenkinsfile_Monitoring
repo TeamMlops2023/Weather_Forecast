@@ -20,7 +20,7 @@ pipeline {
                 script {
                     def currentDir = pwd()
                     sh 'docker cp values.yaml kind-control-plane:/values.yaml'
-                    sh "docker run --network host -v /var/jenkins_home/.kube/config:/root/.kube/config -v ${currentDir}/values.yaml:/values.yaml alpine/helm:latest upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
+                    sh "docker run --network host -v ${KUBECONFIG}:/root/.kube/config -v ${currentDir}/values.yaml:/values.yaml alpine/helm:latest upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
                     echo 'Déploiement de Prometheus réussi.'
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
                 script {
                     def currentDir = pwd()
                     sh 'docker cp grafana-values.yaml kind-control-plane:/grafana-values.yaml'
-                    sh "docker run --network host -v /var/jenkins_home/.kube/config:/root/.kube/config -v ${currentDir}/grafana-values.yaml:/grafana-values.yaml alpine/helm:latest upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
+                    sh "docker run --network host -v ${KUBECONFIG}:/root/.kube/config -v ${currentDir}/grafana-values.yaml:/grafana-values.yaml alpine/helm:latest upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
                     echo 'Déploiement de Grafana réussi.'
                 }
             }
