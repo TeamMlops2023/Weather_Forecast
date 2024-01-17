@@ -1,21 +1,21 @@
 pipeline {
     agent any
+
     environment {
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
+
     stages {
         stage('Nettoyer et Cloner le Dépôt Git') {
             steps {
                 script {
                     sh 'rm -rf Weather_Forecast'
                     sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
-                    sh 'cp Weather_Forecast/monitoring/grafana-values.yaml .'
-                    sh 'cp Weather_Forecast/monitoring/values.yaml .'
                 }
             }
         }
 
-        stage('Deploy Prometheus') {
+        stage('Déployer Prometheus') {
             steps {
                 script {
                     sh 'helm upgrade --install prometheus prometheus-community/prometheus -f values.yaml --namespace monitoring'
@@ -24,7 +24,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Grafana') {
+        stage('Déployer Grafana') {
             steps {
                 script {
                     sh 'helm upgrade --install grafana grafana/grafana -f grafana-values.yaml --namespace monitoring'
@@ -33,6 +33,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo 'Pipeline de déploiement de monitoring terminé. Vérifiez les logs pour les détails.'
