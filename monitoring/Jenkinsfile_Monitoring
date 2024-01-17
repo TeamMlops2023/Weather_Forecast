@@ -18,8 +18,10 @@ pipeline {
         stage('Deploy Prometheus') {
             steps {
                 script {
+                    // Copier le fichier values.yaml dans le serveur Jenkins
                     sh 'docker cp values.yaml kind-control-plane:/values.yaml'
-                    sh "docker exec kind-control-plane helm upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
+                    // Exécuter Helm à l'intérieur d'un conteneur Docker séparé
+                    sh "docker run --network host -v /var/jenkins_home/.kube/config:/root/.kube/config -v $(pwd)/values.yaml:/values.yaml alpine/helm:latest upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
                     echo 'Déploiement de Prometheus réussi.'
                 }
             }
@@ -28,8 +30,10 @@ pipeline {
         stage('Deploy Grafana') {
             steps {
                 script {
+                    // Copier le fichier grafana-values.yaml dans le serveur Jenkins
                     sh 'docker cp grafana-values.yaml kind-control-plane:/grafana-values.yaml'
-                    sh "docker exec kind-control-plane helm upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
+                    // Exécuter Helm à l'intérieur d'un conteneur Docker séparé
+                    sh "docker run --network host -v /var/jenkins_home/.kube/config:/root/.kube/config -v $(pwd)/grafana-values.yaml:/grafana-values.yaml alpine/helm:latest upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
                     echo 'Déploiement de Grafana réussi.'
                 }
             }
