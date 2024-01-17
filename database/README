@@ -1,3 +1,5 @@
+Composants du Projet
+
 Dockerfile pour MySQL
 Utilise l'image officielle MySQL 5.7 de Docker Hub.
 Définit les variables pour la configuration de MySQL, y compris les détails de l'utilisateur et de la base de données.
