@@ -19,8 +19,8 @@ pipeline {
             steps {
                 script {
                     def currentDir = pwd()
-                    // Modifier le chemin du fichier kubeconfig pour utiliser le dossier .kube
-                    sh "docker run --network host -v /var/jenkins_home/.kube:/root/.kube -v ${currentDir}/values.yaml:/values.yaml alpine/helm:latest upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
+                    // Modifier pour monter le fichier kubeconfig directement
+                    sh "docker run --network host -v ${KUBECONFIG}:/root/.kube/config -v ${currentDir}/values.yaml:/values.yaml alpine/helm:latest upgrade --install prometheus prometheus-community/prometheus -f /values.yaml --namespace monitoring"
                     echo 'Déploiement de Prometheus réussi.'
                 }
             }
@@ -30,8 +30,8 @@ pipeline {
             steps {
                 script {
                     def currentDir = pwd()
-                    // Modifier le chemin du fichier kubeconfig pour utiliser le dossier .kube
-                    sh "docker run --network host -v /var/jenkins_home/.kube:/root/.kube -v ${currentDir}/grafana-values.yaml:/grafana-values.yaml alpine/helm:latest upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
+                    // Modifier pour monter le fichier kubeconfig directement
+                    sh "docker run --network host -v ${KUBECONFIG}:/root/.kube/config -v ${currentDir}/grafana-values.yaml:/grafana-values.yaml alpine/helm:latest upgrade --install grafana grafana/grafana -f /grafana-values.yaml --namespace monitoring"
                     echo 'Déploiement de Grafana réussi.'
                 }
             }
