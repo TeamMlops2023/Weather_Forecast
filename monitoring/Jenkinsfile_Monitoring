@@ -36,4 +36,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline de déploiement de monitoring terminé. Vérifiez les logs pour les détails.'
-       
+        }
+    }
+}
