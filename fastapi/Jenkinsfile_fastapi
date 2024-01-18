@@ -80,11 +80,9 @@ pipeline {
         // Déploiement de l'application sur l'environnement de production Kubernetes
         stage('Deploy to Prod Environment') {
             steps {
+                
                 // Confirmation manuelle nécessaire avant de déployer en production
-                input {
-                    message 'Êtes-vous sûr de vouloir déployer en production ?'
-                    ok 'Déployer'
-                }
+                input(id: 'Confirm', message: 'Êtes-vous sûr de vouloir déployer en production ?', ok: 'Déployer')
                 // Application des fichiers de configuration pour déployer sur l'environnement de production
                 sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=prod"
                 sh "docker exec kind-control-plane kubectl apply -f /fastapi-service.yaml --namespace=prod"
