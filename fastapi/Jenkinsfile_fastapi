@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+        DOCKER_USER = credentials('dockerhub_credentials') // Assurez-vous que c'est le bon ID des crédentials
+        DOCKER_PASS = credentials('dockerhub_credentials')
+    }
+    stages {
+        stage('Prepare Environment') {
+            steps {
+                script {
+                    // Nettoyer le répertoire pour éviter tout conflit lors du clonage
+                    sh 'rm -rf Weather_Forecast'
+                    sh 'docker system prune -f'
+                    echo 'Environnement préparé.'
+                }
+            }
+        }
+        stage('Clone Repository') {
+            steps {
+                script {
+                    // Cloner le dépôt Git
+                    sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+                    echo 'Dépôt Git cloné.'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Construire l'image Docker
+                    sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
+                    echo 'Construction de l\'image Docker réussie.'
+                }
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Exécuter le conteneur Docker
+                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
+                    echo 'Conteneur Docker exécuté.'
+                }
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Exécuter les tests
+                    sh 'sleep 10' // Attendre que le serveur FastAPI démarre
+                    sh "docker exec fastapi-container python /app/tests/test_fastapi.py"
+                    echo 'Tests exécutés.'
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Pousser l'image sur Docker Hub
+                    sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                    sh 'docker push mlopsweather2023/fastapi-image:latest'
+                    echo 'Image Docker poussée vers Docker Hub.'
+                }
+            }
+        }
+        stage('Cleanup Test Container') {
+            steps {
+                script {
+                    // Nettoyer le conteneur de test
+                    sh 'docker stop fastapi-container || true'
+                    sh 'docker rm fastapi-container || true'
+                    echo 'Conteneur de test nettoyé.'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Déployer sur Kubernetes
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/fastapi/fastapi-service.yaml"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress.yaml"
+                    echo 'Déploiement sur Kubernetes réussi.'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+        }
+        failure {
+            echo "La construction a échoué."
+        }
+    }
+}
