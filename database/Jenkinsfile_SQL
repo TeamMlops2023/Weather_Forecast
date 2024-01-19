@@ -14,47 +14,69 @@ pipeline {
                 sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
-        // ... autres étapes pour construire et pousser l'image Docker ...
-        stage('Deploy to Test Environment') {
+        stage('Build and Push MySQL Image') {
             steps {
                 script {
-                    sh "kubectl get ns test || kubectl create ns test"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=test"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=test"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-test.yaml --namespace=test"
-                    echo 'Déploiement dans l\'environnement de test réussi.'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        dir('database') {
+                            sh 'docker build -t mlopsweather2023/mysql-image:latest .'
+                            echo 'Construction de l\'image Docker MySQL réussie.'
+                        }
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                        sh 'docker push mlopsweather2023/mysql-image:latest'
+                        echo 'Image Docker MySQL poussée vers Docker Hub.'
+                    }
                 }
             }
         }
-        stage('Deploy to Dev Environment') {
+        stage('Start MySQL Container') {
             steps {
                 script {
-                    sh "kubectl get ns dev || kubectl create ns dev"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=dev"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=dev"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-dev.yaml --namespace=dev"
-                    echo 'Déploiement dans l\'environnement de développement réussi.'
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    sh 'docker run -d --name mysql-container -p 3306:3306 mlopsweather2023/mysql-image:latest'
+                    sh 'sleep 30'
                 }
             }
         }
-        stage('Deploy to Prod Environment') {
+        stage('Insert Data into Database') {
             steps {
                 script {
-                    sh "kubectl get ns prod || kubectl create ns prod"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=prod"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=prod"
-                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-prod.yaml --namespace=prod"
-                    echo 'Déploiement dans l\'environnement de production réussi.'
+                    dir('database') {
+                        sh 'docker exec mysql-container mysql -uroot -pmysecretpassword -e "INSERT INTO mlops_weather.weather_predictions (date, location, prediction, accuracy) VALUES (\'2024-01-01\', \'Paris\', 75, 0.95), (\'2024-01-02\', \'New York\', 65, 0.9), (\'2024-01-03\', \'Tokyo\', 80, 0.93);"'
+                    }
+                }
+            }
+        }
+        stage('Cleanup Test Container') {
+            steps {
+                script {
+                    sh 'docker stop mysql-container || true'
+                    sh 'docker rm mysql-container || true'
+                    echo 'Nettoyage du conteneur MySQL réussi.'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
+                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
+                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
+                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml"
+                    echo 'Déploiement MySQL sur Kubernetes réussi.'
                 }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
-        }
-        failure {
-            echo "La construction a échoué."
+            echo 'Pipeline MySQL terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
