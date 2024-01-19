@@ -1,0 +1,13 @@
+serverFiles:
+  custom-rendezvous: /etc/prometheus/custom-rendezvous.yml
+  custom-rendezvous.yml: |
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace]
+        action: keep
+        regex: (dev|prod|test) # Ajoutez vos namespaces ici
+
+extraArgs:
+  - --config.file=/etc/prometheus/custom-rendezvous.yml
