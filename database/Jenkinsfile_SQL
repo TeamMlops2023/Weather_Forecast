@@ -57,26 +57,52 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Test Environment') {
             steps {
                 script {
-                    sh 'cp Weather_Forecast/kubernetes/database/database-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/database/database-service.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/ingress.yaml .'
-                    sh 'docker cp ./database-deployment.yaml kind-control-plane:/database-deployment.yaml'
-                    sh 'docker cp ./database-service.yaml kind-control-plane:/database-service.yaml'
-                    sh 'docker cp ./ingress.yaml kind-control-plane:/ingress.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment.yaml"
-                    sh "docker exec kind-control-plane kubectl apply -f /database-service.yaml"
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml"
-                    echo 'Déploiement MySQL sur Kubernetes réussi.'
+                    sh "docker exec kind-control-plane kubectl get ns test || docker exec kind-control-plane kubectl create ns test"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-deployment-test.yaml kind-control-plane:/database-deployment-test.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-service-test.yaml kind-control-plane:/database-service-test.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/ingress-test.yaml kind-control-plane:/ingress-test.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment-test.yaml --namespace=test"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service-test.yaml --namespace=test"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-test.yaml --namespace=test"
+                    echo 'Déploiement dans l\'environnement de test réussi.'
+                }
+            }
+        }
+        stage('Deploy to Dev Environment') {
+            steps {
+                script {
+                    sh "docker exec kind-control-plane kubectl get ns dev || docker exec kind-control-plane kubectl create ns dev"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-deployment-dev.yaml kind-control-plane:/database-deployment-dev.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-service-dev.yaml kind-control-plane:/database-service-dev.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/ingress-dev.yaml kind-control-plane:/ingress-dev.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment-dev.yaml --namespace=dev"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service-dev.yaml --namespace=dev"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-dev.yaml --namespace=dev"
+                    echo 'Déploiement dans l\'environnement de développement réussi.'
+                }
+            }
+        }
+        stage('Deploy to Prod Environment') {
+            steps {
+                script {
+                    sh "docker exec kind-control-plane kubectl get ns prod || docker exec kind-control-plane kubectl create ns prod"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-deployment-prod.yaml kind-control-plane:/database-deployment-prod.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/database-service-prod.yaml kind-control-plane:/database-service-prod.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/database/ingress-prod.yaml kind-control-plane:/ingress-prod.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /database-deployment-prod.yaml --namespace=prod"
+                    sh "docker exec kind-control-plane kubectl apply -f /database-service-prod.yaml --namespace=prod"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-prod.yaml --namespace=prod"
+                    echo 'Déploiement dans l\'environnement de production réussi.'
                 }
             }
         }
     }
     post {
         always {
-            echo 'Pipeline MySQL terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
     }
 }
