@@ -8,7 +8,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /database
+      - path: /prod-database
         pathType: Prefix
         backend:
           service:
