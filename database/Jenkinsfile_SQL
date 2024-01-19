@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+    environment {
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
+    }
+    stages {
+        stage('Prepare Environment') {
+            steps {
+                sh 'rm -rf Weather_Forecast'
+            }
+        }
+        stage('Clone Repository') {
+            steps {
+                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
+            }
+        }
+        // ... autres étapes pour construire et pousser l'image Docker ...
+        stage('Deploy to Test Environment') {
+            steps {
+                script {
+                    sh "kubectl get ns test || kubectl create ns test"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=test"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=test"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-test.yaml --namespace=test"
+                    echo 'Déploiement dans l\'environnement de test réussi.'
+                }
+            }
+        }
+        stage('Deploy to Dev Environment') {
+            steps {
+                script {
+                    sh "kubectl get ns dev || kubectl create ns dev"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=dev"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=dev"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-dev.yaml --namespace=dev"
+                    echo 'Déploiement dans l\'environnement de développement réussi.'
+                }
+            }
+        }
+        stage('Deploy to Prod Environment') {
+            steps {
+                script {
+                    sh "kubectl get ns prod || kubectl create ns prod"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-deployment.yaml --namespace=prod"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/database/database-service.yaml --namespace=prod"
+                    sh "kubectl apply -f ./Weather_Forecast/kubernetes/ingress-prod.yaml --namespace=prod"
+                    echo 'Déploiement dans l\'environnement de production réussi.'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
+        }
+        failure {
+            echo "La construction a échoué."
+        }
+    }
+}
