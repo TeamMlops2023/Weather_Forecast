@@ -66,7 +66,7 @@ pipeline {
                 script {
                     sh "docker exec kind-control-plane kubectl get ns test || docker exec kind-control-plane kubectl create ns test"
                     sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
-                    sh 'docker cp ./Weather_Forecast/kubernetes/ingress-test.yaml kind-control-plane:/ingress-test.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-test.yaml kind-control-plane:/ingress-test.yaml'
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=test"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress-test.yaml --namespace=test"
                     echo 'Déploiement dans l\'environnement de test réussi.'
@@ -78,7 +78,7 @@ pipeline {
                 script {
                     sh "docker exec kind-control-plane kubectl get ns dev || docker exec kind-control-plane kubectl create ns dev"
                     sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
-                    sh 'docker cp ./Weather_Forecast/kubernetes/ingress-dev.yaml kind-control-plane:/ingress-dev.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-dev.yaml kind-control-plane:/ingress-dev.yaml'
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=dev"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress-dev.yaml --namespace=dev"
                     echo 'Déploiement dans l\'environnement de développement réussi.'
@@ -90,7 +90,7 @@ pipeline {
                 script {
                     sh "docker exec kind-control-plane kubectl get ns prod || docker exec kind-control-plane kubectl create ns prod"
                     sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml'
-                    sh 'docker cp ./Weather_Forecast/kubernetes/ingress-prod.yaml kind-control-plane:/ingress-prod.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-prod.yaml kind-control-plane:/ingress-prod.yaml'
                     sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=prod"
                     sh "docker exec kind-control-plane kubectl apply -f /ingress-prod.yaml --namespace=prod"
                     echo 'Déploiement dans l\'environnement de production réussi.'
