@@ -7,10 +7,11 @@ spec:
   rules:
   - http:
       paths:
-      - path: /fastapi
+      - path: /database
         pathType: Prefix
         backend:
           service:
-            name: fastapi-service
+            name: database-service
             port:
-              number: 8000
+              number: 3306
+
