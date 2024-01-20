@@ -2,8 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-deployment # Nom du déploiement
-  namespace: monitoring # Espace de noms "monitoring" où déployer le pod
+  name: fastapi-deployment # Nom du déploiement 
 spec:
   replicas: 1 # Nombre de pods à déployer
   selector:
