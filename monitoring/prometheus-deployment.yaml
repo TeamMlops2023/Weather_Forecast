@@ -42,3 +42,4 @@ data:
         scheme: http
         kubernetes_sd_configs:
           - role: pod
+        serviceAccountName: prometheus-sa
