@@ -8,3 +8,8 @@ scrape_configs:
     scheme: http
     kubernetes_sd_configs:
       - role: pod
+      namespaces:
+        names:
+          - test
+          - dev
+          - prod
