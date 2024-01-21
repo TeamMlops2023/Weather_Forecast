@@ -8,5 +8,5 @@ subjects:
   namespace: default
 roleRef:
   kind: ClusterRole
-  name: prometheus-pod-listing
+  name: prometheus
   apiGroup: rbac.authorization.k8s.io
