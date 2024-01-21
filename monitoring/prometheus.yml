@@ -13,6 +13,11 @@ scrape_configs:
             - test
             - dev
             - prod
-        selectors:
-          - role: pod
-            app: fastapi
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: replace
+        target_label: app
+      # Vous pouvez ajouter plus de relabel_configs ici si nécessaire.
