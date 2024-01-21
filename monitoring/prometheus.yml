@@ -8,8 +8,11 @@ scrape_configs:
     scheme: http
     kubernetes_sd_configs:
       - role: pod
-      namespaces:
-        names:
-          - test
-          - dev
-          - prod
+        namespaces:
+          names:
+            - test
+            - dev
+            - prod
+        selectors:
+          - role: pod
+            app: fastapi
