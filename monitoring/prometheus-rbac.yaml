@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: prometheus-pod-listing  # Ce nom peut être trompeur si le rôle fait plus que simplement lister les pods, envisagez un nom comme 'prometheus' ou 'prometheus-cluster-role'
+  name: prometheus
 rules:
 - apiGroups: [""]
   resources:
