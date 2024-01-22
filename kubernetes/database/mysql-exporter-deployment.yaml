@@ -18,6 +18,14 @@ spec:
         image: prom/mysqld-exporter
         env:
         - name: DATA_SOURCE_NAME
-          value: "mlops:mlops@(database-service.test.svc.cluster.local:3306)/mlops_weather"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-creds
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-creds
+              key: MYSQL_PASSWORD
         ports:
         - containerPort: 9104
