@@ -21,11 +21,6 @@ spec:
           valueFrom:
             secretKeyRef:
               name: mysql-creds
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-creds
-              key: MYSQL_PASSWORD
+              key: DATA_SOURCE_NAME
         ports:
         - containerPort: 9104
