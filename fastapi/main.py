@@ -4,6 +4,7 @@ from sqlalchemy.engine import create_engine
 from datetime import datetime
 from datetime import date
 import os
+from sqlalchemy import text
 from prometheus_fastapi_instrumentator import Instrumentator
 
 # Création d'une instance FastAPI
@@ -55,13 +56,13 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 
 # Nouvelle route pour obtenir les données historiques
 @app.get("/historical-data")
-async def get_historical_data(location: str, start_date: datetime, end_date: datetime):
+async def get_historical_data(location: str, start_date: date, end_date: date):
+    query = text("""
+        SELECT date, location, status, value 
+        FROM historical_weather_data 
+        WHERE location = :location AND date BETWEEN :start_date AND :end_date;
+    """)
     with mysql_engine.connect() as connection:
-        query = """
-                SELECT date, location, status, value 
-                FROM historical_weather_data 
-                WHERE location = :location AND date BETWEEN :start_date AND :end_date;
-                """
         results = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date})
         data = [HistoricalData(date=row[0], location=row[1], status=row[2], value=row[3]) for row in results.fetchall()]
 
