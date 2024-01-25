@@ -4,10 +4,13 @@ from pydantic import BaseModel
 from sqlalchemy.engine import create_engine
 from datetime import datetime, timedelta
 import os
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Création d'une instance FastAPI
 app = FastAPI()
 
+# Instrumentation pour Prometheus
+Instrumentator().instrument(app).expose(app)
 
 # Création de la connection à la base sql
 # Variable de connection
