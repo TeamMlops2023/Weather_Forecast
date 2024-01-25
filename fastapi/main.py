@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.engine import create_engine
 from datetime import datetime
+from datetime import date
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -25,7 +26,7 @@ mysql_engine = create_engine(connection_url)
 
 # Modèle pour les prédictions
 class Prediction(BaseModel):
-    date: datetime
+    date: date
     location: str
     prediction: int
     accuracy: float
@@ -54,7 +55,7 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 
 # Nouvelle route pour obtenir les données historiques
 @app.get("/historical-data")
-async def get_historical_data(location: str, start_date: datetime, end_date: datetime):
+async def get_historical_data(location: str, start_date: date, end_date: date):
     with mysql_engine.connect() as connection:
         query = """
                 SELECT date, location, status, value 
