@@ -20,7 +20,7 @@ mysql_password = 'mysecretpassword'  # to complete
 database_name = 'mlops_weather'
 
 # Création de l'URL de connection
-connection_url = 'mysql://{user}:{password}@{url}/{database}'.format(
+connection_url = 'mysql+pymysql://{user}:{password}@{url}/{database}'.format(
     user=mysql_user,
     password=mysql_password,
     url=mysql_url,
