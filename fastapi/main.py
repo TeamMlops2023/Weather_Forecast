@@ -62,7 +62,7 @@ async def get_historical_data(location: str, start_date: date, end_date: date):
                 FROM historical_weather_data 
                 WHERE location = %s AND date BETWEEN %s AND %s;
                 """
-        results = connection.execute(query, (location, start_date, end_date))
+        results = connection.execute(query, {location, start_date, end_date})
         data = [HistoricalData(date=row[0], location=row[1], status=row[2], value=row[3]) for row in results.fetchall()]
 
     if not data:
