@@ -46,8 +46,13 @@ async def read_root():
 # Définition de l'endpoint "/status"
 @app.get("/status")
 async def get_status():
-    # Renvoie un statut ok = 1
-    return 1
+    # Renvoie un statut ok = {"status": "ok"}
+    return {"status": "ok"}
+
+# Définition de l'endpoint "/echo" avec un paramètre de requête textuel
+@app.get("/echo")
+async def echo(text: str = Query(None, min_length=1, max_length=100)):
+    return {"echo": text}
 
 # Définition de l'endpoint "/prediction" avec un paramètre de requête textuel
 @app.get('/prediction/{ville:str}', response_model=predict)
