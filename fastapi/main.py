@@ -55,7 +55,7 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 # Endpoint pour obtenir une prédiction
 @app.get('/prediction/{location}', response_model=Prediction)
 async def get_prediction(location: str):
-    # ...
+    # Votre logique pour obtenir une prédiction ici
 
 # Nouvelle route pour obtenir les données historiques
 @app.get("/historical-data")
