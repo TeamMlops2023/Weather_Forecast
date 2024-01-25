@@ -12,14 +12,14 @@ app = FastAPI()
 # Instrumentation pour Prometheus
 Instrumentator().instrument(app).expose(app)
 
-# Création de la connection à la base sql
-# Variable de connection
+# Création de la connection à la base de données
+# Variables de connexion
 mysql_url = os.environ.get('MYSQL_URL')
 mysql_user = 'root'
-mysql_password = 'mysecretpassword'  # to complete
+mysql_password = 'mysecretpassword'  # À compléter
 database_name = 'mlops_weather'
 
-# Création de l'URL de connection
+# Création de l'URL de connexion
 connection_url = 'mysql+pymysql://{user}:{password}@{url}/{database}'.format(
     user=mysql_user,
     password=mysql_password,
@@ -27,26 +27,24 @@ connection_url = 'mysql+pymysql://{user}:{password}@{url}/{database}'.format(
     database=database_name
 )
 
-# Création de la connection
+# Création de la connexion
 mysql_engine = create_engine(connection_url)
 
-# creation de la classe prediction
-class predict(BaseModel):
-    date: datetime = 99991231
-    ville: str = 'paris'
-    prediction: str = 'ne sait pas'
-    proba: float = 0.5
+# Création de la classe de modèle pour la prédiction
+class Prediction(BaseModel):
+    date: datetime = None
+    location: str = None
+    prediction: int = None
+    accuracy: float = None
 
 # Définition de l'endpoint racine ("/")
 @app.get("/")
 async def read_root():
-    # Renvoie un message JSON lorsque quelqu'un accède à la racine de l'application
     return {"Hello": "World"}
 
 # Définition de l'endpoint "/status"
 @app.get("/status")
 async def get_status():
-    # Renvoie un statut ok = {"status": "ok"}
     return {"status": "ok"}
 
 # Définition de l'endpoint "/echo" avec un paramètre de requête textuel
@@ -55,32 +53,31 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
     return {"echo": text}
 
 # Définition de l'endpoint "/prediction" avec un paramètre de requête textuel
-@app.get('/prediction/{ville:str}', response_model=predict)
-async def get_prediction(ville):
-    date_format = "%Y%m%d"
+@app.get('/prediction/{location:str}', response_model=Prediction)
+async def get_prediction(location):
+    date_format = "%Y-%m-%d"
     tomorrow = datetime.now() + timedelta(days=1)
     tomorrow = tomorrow.strftime(date_format)
 
     with mysql_engine.connect() as connection:
         results = connection.execute(
-            'SELECT * FROM weather_predictions WHERE weather_predictions.ville = "{}" AND weather_predictions.date = "{}";'.format(ville, tomorrow))
+            "SELECT date, location, prediction, accuracy FROM weather_predictions WHERE location = '{}' AND date = '{}';".format(location, tomorrow))
 
-    results = [
-        predict(
-            date = i[0],
-            ville = i[1],
-            prediction = i[2],
-            proba = i[3]
+        result_list = [
+            Prediction(
+                date=i[0],
+                location=i[1],
+                prediction=i[2],
+                accuracy=i[3]
             ) for i in results.fetchall()]
 
-    if len(results) == 0:
+    if len(result_list) == 0:
         raise HTTPException(
             status_code=404,
             detail='Prédiction non trouvée')
     else:
-        return results[0]
+        return result_list[0]
 
 # Vérifie si le script est exécuté en tant que fichier principal
 if __name__ == "__main__":
-    # Exécute l'application en utilisant Uvicorn avec les paramètres spécifiés
     uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
