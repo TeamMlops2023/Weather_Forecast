@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Query, HTTPException
-import uvicorn
 from pydantic import BaseModel
 from sqlalchemy.engine import create_engine
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -12,11 +11,10 @@ app = FastAPI()
 # Instrumentation pour Prometheus
 Instrumentator().instrument(app).expose(app)
 
-# Création de la connexion à la base de données
-# Variables de connexion
-mysql_url = os.environ.get('MYSQL_URL', 'database-service')  # Utilisez le nom du service Kubernetes comme hôte par défaut
-mysql_user = os.environ.get('MYSQL_USER', 'mlops')           # Utilisateur par défaut 'mlops'
-mysql_password = os.environ.get('MYSQL_PASSWORD', 'mlops')   # Mot de passe par défaut 'mlops'
+# Variables de connexion à la base de données
+mysql_url = os.environ.get('MYSQL_URL', 'database-service')
+mysql_user = os.environ.get('MYSQL_USER', 'mlops')
+mysql_password = os.environ.get('MYSQL_PASSWORD', 'mlops')
 database_name = 'mlops_weather'
 
 # Création de l'URL de connexion
@@ -25,56 +23,57 @@ connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_url}/{da
 # Création de la connexion
 mysql_engine = create_engine(connection_url)
 
-# Création de la classe de modèle pour la prédiction
+# Modèle pour les prédictions
 class Prediction(BaseModel):
     date: datetime
     location: str
     prediction: int
     accuracy: float
 
-# Définition de l'endpoint racine ("/")
+# Modèle pour les données historiques
+class HistoricalData(BaseModel):
+    date: datetime
+    location: str
+    status: int
+    value: float
+
+# Endpoint racine
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
 
-# Définition de l'endpoint "/status"
+# Endpoint pour vérifier le statut
 @app.get("/status")
 async def get_status():
     return {"status": "ok"}
 
-# Définition de l'endpoint "/echo" avec un paramètre de requête textuel
+# Endpoint pour l'écho
 @app.get("/echo")
 async def echo(text: str = Query(None, min_length=1, max_length=100)):
     return {"echo": text}
 
-# Définition de l'endpoint "/prediction" avec un paramètre de requête textuel
+# Endpoint pour obtenir une prédiction
 @app.get('/prediction/{location}', response_model=Prediction)
 async def get_prediction(location: str):
-    date_format = "%Y-%m-%d"
-    tomorrow = datetime.now() + timedelta(days=1)
-    tomorrow = tomorrow.strftime(date_format)
+    # ...
 
+# Nouvelle route pour obtenir les données historiques
+@app.get("/historical-data")
+async def get_historical_data(location: str, start_date: datetime, end_date: datetime):
     with mysql_engine.connect() as connection:
-        results = connection.execute(
-            "SELECT date, location, prediction, accuracy FROM weather_predictions WHERE location = %s AND date = %s;",
-            (location, tomorrow)
-        )
-        result_list = [
-            Prediction(
-                date=i[0],
-                location=i[1],
-                prediction=i[2],
-                accuracy=i[3]
-            ) for i in results.fetchall()
-        ]
+        query = """
+                SELECT date, location, status, value 
+                FROM historical_weather_data 
+                WHERE location = %s AND date BETWEEN %s AND %s;
+                """
+        results = connection.execute(query, (location, start_date, end_date))
+        data = [HistoricalData(date=row[0], location=row[1], status=row[2], value=row[3]) for row in results.fetchall()]
 
-    if not result_list:
-        raise HTTPException(
-            status_code=404,
-            detail='Prediction not found'
-        )
-    return result_list[0]
+    if not data:
+        raise HTTPException(status_code=404, detail="No historical data found")
 
-# Vérifie si le script est exécuté en tant que fichier principal
+    return data
+
+# Exécuter l'application si c'est le fichier principal
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
