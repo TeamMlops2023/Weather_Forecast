@@ -2,3 +2,6 @@ fastapi
 uvicorn
 requests
 prometheus_fastapi_instrumentator
+pydantic
+sqlalchemy
+python-dotenv
