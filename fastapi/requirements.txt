@@ -6,3 +6,4 @@ pydantic
 sqlalchemy
 python-dotenv
 pymysql
+pytest
