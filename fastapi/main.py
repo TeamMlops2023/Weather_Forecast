@@ -1,70 +1,46 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
-from sqlalchemy.engine import create_engine
-from datetime import date
 import os
-from sqlalchemy import text
-from prometheus_fastapi_instrumentator import Instrumentator
 
-# Création d'une instance FastAPI
-app = FastAPI()
-
-# Instrumentation pour Prometheus
-Instrumentator().instrument(app).expose(app)
-
-# Variables de connexion à la base de données
+# Récupérez les variables d'environnement pour la connexion à la base de données
 mysql_url = os.environ.get('MYSQL_URL', 'database-service')
 mysql_user = os.environ.get('MYSQL_USER', 'mlops')
 mysql_password = os.environ.get('MYSQL_PASSWORD', 'mlops')
 database_name = 'mlops_weather'
 
-# Création de l'URL de connexion
+# Créez l'URL de connexion à la base de données
 connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_url}/{database_name}'
 
-# Création de la connexion
-mysql_engine = create_engine(connection_url)
+# Configuration de la connexion à la base de données
+engine = create_engine(connection_url)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Modèle pour les données historiques
-class HistoricalData(BaseModel):
+app = FastAPI()
+
+# Modèle de données pour les résultats de la requête
+class WeatherPrediction(BaseModel):
+    id: int
     date: date
     location: str
     prediction: int
     accuracy: float
 
-# Endpoint racine
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
+# Endpoint pour interroger la base de données
+@app.get("/predictions/")
+def get_weather_predictions():
+    # Créez une session SQLAlchemy
+    db = SessionLocal()
 
-# Endpoint pour vérifier le statut
-@app.get("/status")
-async def get_status():
-    return {"status": "ok"}
+    # Exécutez une requête SQL pour récupérer les prédictions météo
+    query = text("SELECT * FROM weather_predictions")
+    results = db.execute(query).fetchall()
 
-# Endpoint pour l'écho
-@app.get("/echo")
-async def echo(text: str = Query(None, min_length=1, max_length=100)):
-    return {"echo": text}
+    # Transformez les résultats en liste de dictionnaires
+    predictions = [dict(result) for result in results]
 
+    # Fermez la session
+    db.close()
 
-# Nouvelle route pour obtenir les données historiques
-@app.get("/historical-data")
-async def get_historical_data(location: str, start_date: date, end_date: date):
-    with mysql_engine.connect() as connection:
-        query = text("""
-                SELECT date, location, prediction, accuracy 
-                FROM weather_predictions 
-                WHERE location = :location AND date BETWEEN :start_date AND :end_date;
-                """)
-        result = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date}).fetchall()
-
-        if not result:
-            raise HTTPException(status_code=404, detail="No historical data found")
-
-        data = [HistoricalData(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in result]
-        return data
-
-# Exécuter l'application si c'est le fichier principal
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
+    return predictions
