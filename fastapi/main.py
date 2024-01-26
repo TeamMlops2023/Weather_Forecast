@@ -28,6 +28,20 @@ class WeatherPrediction(BaseModel):
     prediction: int
     accuracy: float
 
+# Endpoint racine
+@app.get("/")
+async def read_root():
+    return {"Hello": "World"}
+
+# Endpoint pour vérifier le statut
+@app.get("/status")
+async def get_status():
+    return {"status": "ok"}
+
+# Endpoint pour l'écho
+@app.get("/echo")
+async def echo(text: str = Query(None, min_length=1, max_length=100)):
+    return {"echo": text}
 
 @app.get("/predictions/")
 def get_weather_predictions():
