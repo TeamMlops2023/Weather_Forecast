@@ -1,15 +1,11 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from datetime import date
 import os
-from prometheus_fastapi_instrumentator import Instrumentator
 
 # Création d'une instance FastAPI
 app = FastAPI()
-
-# Instrumentation pour Prometheus
-Instrumentator().instrument(app).expose(app)
 
 # Variables de connexion à la base de données
 mysql_url = os.environ.get('MYSQL_URL', 'database-service')
@@ -30,37 +26,24 @@ class HistoricalData(BaseModel):
     prediction: int
     accuracy: float
 
-# Endpoint racine
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-
-# Endpoint pour vérifier le statut
-@app.get("/status")
-async def get_status():
-    return {"status": "ok"}
-
-# Endpoint pour l'écho
-@app.get("/echo")
-async def echo(text: str = Query(None, min_length=1, max_length=100)):
-    return {"echo": text}
-
-# Endpoint pour obtenir les données historiques
-@app.get("/historical-data")
-async def get_historical_data(location: str, start_date: date, end_date: date):
+# Endpoint pour obtenir les données historiques d'une ville
+@app.get("/predictions")
+async def get_predictions(city: str):
     query = text("""
         SELECT date, location, prediction, accuracy 
         FROM weather_predictions 
-        WHERE location = :location AND date BETWEEN :start_date AND :end_date;
+        WHERE location = :city
+        ORDER BY date DESC
+        LIMIT 1;
     """)
     
     with mysql_engine.connect() as connection:
-        result = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date}).fetchall()
+        result = connection.execute(query, {'city': city}).fetchone()
 
     if not result:
-        raise HTTPException(status_code=404, detail="No historical data found")
+        raise HTTPException(status_code=404, detail="No predictions found for the city")
 
-    return [HistoricalData(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in result]
+    return HistoricalData(date=result[0], location=result[1], prediction=result[2], accuracy=result[3])
 
 # Exécuter l'application si c'est le fichier principal
 if __name__ == "__main__":
