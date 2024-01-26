@@ -41,7 +41,7 @@ async def get_status():
 async def echo(text: str = Query(None, min_length=1, max_length=100)):
     return {"echo": text}
 
-@app.get("/predictions/")
+@app.get("/predictions")
 def get_weather_predictions(location: str, date: date):
     db = SessionLocal()
 
