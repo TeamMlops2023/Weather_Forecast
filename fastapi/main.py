@@ -39,20 +39,31 @@ async def echo(text: str):
     return {"echo": text}
 
 @app.get("/predictions")
-async def get_weather_predictions(location: str):
-    query = text("""
-    SELECT date, location, prediction, accuracy
-    FROM weather_predictions
-    WHERE location = :location
-    ORDER BY date DESC
-    LIMIT 1;
-    """)
+async def get_weather_predictions(location: str, prediction_date: date = Query(None)):
+    if prediction_date:
+        query = text("""
+        SELECT date, location, prediction, accuracy
+        FROM weather_predictions
+        WHERE location = :location AND date = :prediction_date
+        ORDER BY date DESC
+        LIMIT 1;
+        """)
+        params = {'location': location, 'prediction_date': prediction_date}
+    else:
+        query = text("""
+        SELECT date, location, prediction, accuracy
+        FROM weather_predictions
+        WHERE location = :location
+        ORDER BY date DESC
+        LIMIT 1;
+        """)
+        params = {'location': location}
 
     with mysql_engine.connect() as connection:
-        result = connection.execute(query, {'location': location}).fetchone()
+        result = connection.execute(query, params).fetchone()
 
     if not result:
-        raise HTTPException(status_code=404, detail="No predictions found for the location")
+        raise HTTPException(status_code=404, detail="No predictions found for the specified location and date")
 
     return WeatherPrediction(date=result[0], location=result[1], prediction=result[2], accuracy=result[3])
 
