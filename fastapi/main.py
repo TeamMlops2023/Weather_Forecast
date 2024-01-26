@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from datetime import date
 import os
