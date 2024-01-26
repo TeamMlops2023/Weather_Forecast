@@ -24,8 +24,8 @@ connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_url}/{da
 # Création de la connexion
 mysql_engine = create_engine(connection_url)
 
-# Modèle pour les prédictions
-class Prediction(BaseModel):
+# Modèle pour les données historiques
+class HistoricalData(BaseModel):
     date: date
     location: str
     prediction: int
@@ -52,17 +52,17 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 async def get_historical_data(location: str, start_date: date, end_date: date):
     with mysql_engine.connect() as connection:
         query = text("""
-            SELECT date, location, prediction, accuracy 
-            FROM weather_predictions 
-            WHERE location = :location AND date BETWEEN :start_date AND :end_date;
-        """)
-        results = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date})
-        data = [HistoricalData(date=row[0], location=row[1], status=row[2], value=row[3]) for row in results.fetchall()]
+                SELECT date, location, prediction, accuracy 
+                FROM weather_predictions 
+                WHERE location = :location AND date BETWEEN :start_date AND :end_date;
+                """)
+        result = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date}).fetchall()
 
-    if not data:
-        raise HTTPException(status_code=404, detail="No historical data found")
+        if not result:
+            raise HTTPException(status_code=404, detail="No historical data found")
 
-    return data
+        data = [HistoricalData(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in result]
+        return data
 
 # Exécuter l'application si c'est le fichier principal
 if __name__ == "__main__":
