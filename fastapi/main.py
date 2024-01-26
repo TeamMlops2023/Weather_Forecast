@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.engine import create_engine
-from datetime import datetime
 from datetime import date
 import os
 from sqlalchemy import text
@@ -32,13 +31,6 @@ class Prediction(BaseModel):
     prediction: int
     accuracy: float
 
-# Modèle pour les données historiques
-class HistoricalData(BaseModel):
-    date: date
-    location: str
-    status: int
-    value: float
-
 # Endpoint racine
 @app.get("/")
 async def read_root():
@@ -54,17 +46,22 @@ async def get_status():
 async def echo(text: str = Query(None, min_length=1, max_length=100)):
     return {"echo": text}
 
+# Endpoint pour obtenir une prédiction (Si nécessaire, sinon vous pouvez l'enlever)
+@app.get('/prediction/{location}', response_model=Prediction)
+async def get_prediction(location: str):
+    # Votre logique de traitement pour récupérer une prédiction...
+
 # Nouvelle route pour obtenir les données historiques
 @app.get("/historical-data")
 async def get_historical_data(location: str, start_date: date, end_date: date):
-    with mysql_engine.connect() as connection:
-        query = """
+    query = text("""
                 SELECT date, location, prediction, accuracy 
                 FROM weather_predictions 
-                WHERE location = %s AND date BETWEEN %s AND %s;
-                """
-        results = connection.execute(query, {location, start_date, end_date})
-        data = [WeatherPrediction(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in results.fetchall()]
+                WHERE location = :location AND date BETWEEN :start_date AND :end_date;
+                """)
+    with mysql_engine.connect() as connection:
+        results = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date})
+        data = [Prediction(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in results.fetchall()]
 
     if not data:
         raise HTTPException(status_code=404, detail="No historical data found")
@@ -73,4 +70,5 @@ async def get_historical_data(location: str, start_date: date, end_date: date):
 
 # Exécuter l'application si c'est le fichier principal
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
