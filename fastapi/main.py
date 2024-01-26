@@ -1,11 +1,17 @@
 from fastapi import FastAPI, HTTPException, Query
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from datetime import date
 import os
+import logging
 
 app = FastAPI()
 
+# Adresse IP du conteneur MySQL (remplacez par l'adresse IP appropriée)
+mysql_ip = '10.96.39.152'  # Remplacez ceci par l'adresse IP de votre conteneur MySQL
 # Adresse IP du conteneur MySQL
 mysql_ip = '10.96.39.152'  # Utilisez l'adresse IP de votre conteneur MySQL
 
@@ -14,46 +20,73 @@ mysql_user = os.environ.get('MYSQL_USER', 'mlops')
 mysql_password = os.environ.get('MYSQL_PASSWORD', 'mlops')
 database_name = 'mlops_weather'
 
+# Création de l'URL de connexion en utilisant l'adresse IP
 # Création de l'URL de connexion
 connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_ip}/{database_name}'
 
 # Création de la connexion
 mysql_engine = create_engine(connection_url)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=mysql_engine)
 
 class WeatherPrediction(BaseModel):
+    id: int
     date: date
     location: str
     prediction: int
-    accuracy: float
+@@ -39,41 +35,27 @@ async def get_status():
+    return {"status": "ok"}
+
+@app.get("/echo")
+async def echo(text: str = Query(None, min_length=1, max_length=100)):
+async def echo(text: str):
+    return {"echo": text}
 
 @app.get("/predictions")
-async def get_weather_predictions(location: str, prediction_date: date = None):
-    # Construire la requête de base
+def get_weather_predictions(location: str):
+    db = SessionLocal()
+async def get_weather_predictions(location: str):
     query = text("""
     SELECT date, location, prediction, accuracy
     FROM weather_predictions
     WHERE location = :location
+    ORDER BY date DESC
+    LIMIT 1;
     """)
 
-    # Ajouter une clause conditionnelle pour la date si elle est fournie
-    if prediction_date:
-        query = text(f"{query} AND date = :prediction_date")
-
-    query = text(f"{query} ORDER BY date DESC LIMIT 1;")
-
-    # Préparer les paramètres pour la requête SQL
-    params = {'location': location}
-    if prediction_date:
-        params['prediction_date'] = prediction_date
-
+    try:
+        query = text("""
+        SELECT date, location, prediction, accuracy
+        FROM weather_predictions
+        WHERE location = :location
+        ORDER BY date DESC
+        LIMIT 1;
+        """)
+        results = db.execute(query, {'location': location}).fetchall()
     with mysql_engine.connect() as connection:
-        result = connection.execute(query, params).fetchone()
+        result = connection.execute(query, {'location': location}).fetchone()
 
+        predictions = []
+        for result in results:
+            prediction = {
+                'date': result[0],
+                'location': result[1],
+                'prediction': result[2],
+                'accuracy': result[3]
+            }
+            predictions.append(prediction)
     if not result:
-        raise HTTPException(status_code=404, detail="No predictions found for the specified location and date")
+        raise HTTPException(status_code=404, detail="No predictions found for the location")
 
+        return predictions
+    except Exception as e:
+        # Journaliser le message d'erreur
+        logging.error("Erreur d'interrogation de la base de données : %s", e)
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+    finally:
+        db.close()
     return WeatherPrediction(date=result[0], location=result[1], prediction=result[2], accuracy=result[3])
 
 if __name__ == "__main__":
     import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info")
     uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
