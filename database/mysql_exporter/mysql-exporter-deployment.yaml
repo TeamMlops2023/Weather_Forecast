@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: mysqld-exporter
-        image: prom/mysqld-exporter:latest
+        image: image: prom/mysqld-exporter:v0.12.1
         env:
         - name: DATA_SOURCE_NAME
           value: "mlops:mlops@tcp(10.96.39.152:3306)/mlops_weather"
