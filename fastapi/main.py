@@ -34,7 +34,7 @@ class Prediction(BaseModel):
 
 # Modèle pour les données historiques
 class HistoricalData(BaseModel):
-    date: datetime
+    date: date
     location: str
     status: int
     value: float
@@ -56,14 +56,14 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 
 # Nouvelle route pour obtenir les données historiques
 @app.get("/historical-data")
-async def get_historical_data(location: str, start_date: datetime, end_date: datetime):
+async def get_historical_data(location: str, start_date: date, end_date: date):
     with mysql_engine.connect() as connection:
         query = """
                 SELECT date, location, prediction, accuracy 
                 FROM weather_predictions 
                 WHERE location = %s AND date BETWEEN %s AND %s;
                 """
-        results = connection.execute(query, (location, start_date, end_date))
+        results = connection.execute(query, {location, start_date, end_date})
         data = [WeatherPrediction(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in results.fetchall()]
 
     if not data:
