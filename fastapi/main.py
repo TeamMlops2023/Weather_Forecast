@@ -58,8 +58,10 @@ def get_weather_predictions(location: str):
         predictions = [dict(result) for result in results]
         return predictions
     except Exception as e:
-        print(e)  # Ajout pour aider au débogage
-        raise HTTPException(status_code=500, detail=str(e))
+        # Journaliser le message d'erreur
+        import logging
+        logging.error("Erreur d'interrogation de la base de données : %s", e)
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
     finally:
         db.close()
 
