@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
+from datetime import date 
 import os
 
 # Récupérez les variables d'environnement pour la connexion à la base de données
