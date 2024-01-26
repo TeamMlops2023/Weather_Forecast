@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel
 from datetime import date
 import os
+import logging
 
 app = FastAPI()
 
@@ -55,11 +56,19 @@ def get_weather_predictions(location: str):
         """)
         results = db.execute(query, {'location': location}).fetchall()
 
-        predictions = [dict(result) for result in results]
+        predictions = []
+        for result in results:
+            prediction = {
+                'date': result[0],
+                'location': result[1],
+                'prediction': result[2],
+                'accuracy': result[3]
+            }
+            predictions.append(prediction)
+
         return predictions
     except Exception as e:
         # Journaliser le message d'erreur
-        import logging
         logging.error("Erreur d'interrogation de la base de données : %s", e)
         raise HTTPException(status_code=500, detail="Erreur interne du serveur")
     finally:
