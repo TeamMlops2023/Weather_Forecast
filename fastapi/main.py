@@ -51,10 +51,10 @@ async def echo(text: str = Query(None, min_length=1, max_length=100)):
 @app.get("/historical-data")
 async def get_historical_data(location: str, start_date: date, end_date: date):
     query = text("""
-                SELECT date, location, prediction, accuracy 
-                FROM weather_predictions 
-                WHERE location = :location AND date BETWEEN :start_date AND :end_date;
-                """)
+            SELECT date, location, prediction, accuracy 
+            FROM weather_predictions 
+            WHERE location = :location AND date BETWEEN :start_date AND :end_date;
+            """)
     with mysql_engine.connect() as connection:
         results = connection.execute(query, {'location': location, 'start_date': start_date, 'end_date': end_date})
         data = [Prediction(date=row[0], location=row[1], prediction=row[2], accuracy=row[3]) for row in results.fetchall()]
