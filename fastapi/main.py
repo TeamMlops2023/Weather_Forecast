@@ -47,18 +47,19 @@ def get_weather_predictions(location: str):
 
     try:
         query = text("""
-    SELECT date, location, prediction, accuracy
-    FROM weather_predictions
-    WHERE location = :location
-    ORDER BY date DESC
-    LIMIT 1;
-""")
-        results = db.execute(query, {'location': location, 'date': date}).fetchall()
+        SELECT date, location, prediction, accuracy
+        FROM weather_predictions
+        WHERE location = :location
+        ORDER BY date DESC
+        LIMIT 1;
+        """)
+        results = db.execute(query, {'location': location}).fetchall()
 
         predictions = [dict(result) for result in results]
         return predictions
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        print(e)  # Ajout pour aider au débogage
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
 
