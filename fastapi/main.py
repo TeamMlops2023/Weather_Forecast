@@ -7,6 +7,9 @@ import os
 
 app = FastAPI()
 
+# Instrumentation pour Prometheus
+Instrumentator().instrument(app).expose(app)
+
 # Adresse IP du conteneur MySQL
 mysql_ip = '10.96.39.152'  # Utilisez l'adresse IP de votre conteneur MySQL
 
