@@ -21,7 +21,6 @@ connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_url}/{da
 mysql_engine = create_engine(connection_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=mysql_engine)
 
-
 class WeatherPrediction(BaseModel):
     id: int
     date: date
@@ -51,7 +50,7 @@ def get_weather_predictions():
 
     try:
         # Exécutez une requête SQL pour récupérer les prédictions météo
-        query = text("SELECT * FROM weather_predictions")
+        query = text("SELECT date, location, prediction, accuracy FROM weather_predictions WHERE location = 'Sydney' AND date BETWEEN '2014-01-16' AND '2014-01-17'")
         results = db.execute(query).fetchall()
 
         # Transformez les résultats en liste de dictionnaires
