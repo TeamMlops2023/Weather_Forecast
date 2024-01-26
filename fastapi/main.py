@@ -46,8 +46,13 @@ def get_weather_predictions(location: str, date: date):
     db = SessionLocal()
 
     try:
-        query = text("SELECT date, location, prediction, accuracy FROM weather_predictions "
-                     "WHERE location = :location AND date = :date")
+        query = text("""
+    SELECT date, location, prediction, accuracy
+    FROM weather_predictions
+    WHERE location = :location
+    ORDER BY date DESC
+    LIMIT 1;
+""")
         results = db.execute(query, {'location': location, 'date': date}).fetchall()
 
         predictions = [dict(result) for result in results]
