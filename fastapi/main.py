@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from datetime import date
+from prometheus_fastapi_instrumentator import Instrumentator
 import os
 
 app = FastAPI()
