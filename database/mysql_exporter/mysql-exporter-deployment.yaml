@@ -16,17 +16,9 @@ spec:
     spec:
       containers:
       - name: mysqld-exporter
-        image: prom/mysqld-exporter:latest
+        image: prom/mysqld-exporter:latest  # Remplacez 'latest' par une version spécifique si nécessaire
         env:
         - name: DATA_SOURCE_NAME
-          valueFrom:
-            secretKeyRef:
-              name: mysql-exporter-secret
-              key: username
-        - name: DATA_SOURCE_PASS
-          valueFrom:
-            secretKeyRef:
-              name: mysql-exporter-secret
-              key: password
+          value: "mlops:mlops@(10.96.39.152:3306)/mlops_weather"  # Assurez-vous que 'mlops' est le mot de passe correct
         ports:
         - containerPort: 9104
