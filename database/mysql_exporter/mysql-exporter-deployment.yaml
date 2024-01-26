@@ -16,9 +16,9 @@ spec:
     spec:
       containers:
       - name: mysqld-exporter
-        image: prom/mysqld-exporter:latest  # Remplacez 'latest' par une version spécifique si nécessaire
+        image: prom/mysqld-exporter:latest
         env:
         - name: DATA_SOURCE_NAME
-          value: "mlops:mlops@tcp(10.96.39.152:3306)/mlops_weather"  
+          value: "mlops:mlops@tcp(10.96.39.152:3306)/mlops_weather"
         ports:
         - containerPort: 9104
