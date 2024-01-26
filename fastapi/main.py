@@ -26,38 +26,25 @@ class WeatherPrediction(BaseModel):
     prediction: int
     accuracy: float
 
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-
-@app.get("/status")
-async def get_status():
-    return {"status": "ok"}
-
-@app.get("/echo")
-async def echo(text: str):
-    return {"echo": text}
-
 @app.get("/predictions")
-async def get_weather_predictions(location: str, prediction_date: date = Query(None)):
+async def get_weather_predictions(location: str, prediction_date: date = None):
+    # Construire la requête de base
+    query = text("""
+    SELECT date, location, prediction, accuracy
+    FROM weather_predictions
+    WHERE location = :location
+    """)
+
+    # Ajouter une clause conditionnelle pour la date si elle est fournie
     if prediction_date:
-        query = text("""
-        SELECT date, location, prediction, accuracy
-        FROM weather_predictions
-        WHERE location = :location AND date = :prediction_date
-        ORDER BY date DESC
-        LIMIT 1;
-        """)
-        params = {'location': location, 'prediction_date': prediction_date}
-    else:
-        query = text("""
-        SELECT date, location, prediction, accuracy
-        FROM weather_predictions
-        WHERE location = :location
-        ORDER BY date DESC
-        LIMIT 1;
-        """)
-        params = {'location': location}
+        query = text(f"{query} AND date = :prediction_date")
+
+    query = text(f"{query} ORDER BY date DESC LIMIT 1;")
+
+    # Préparer les paramètres pour la requête SQL
+    params = {'location': location}
+    if prediction_date:
+        params['prediction_date'] = prediction_date
 
     with mysql_engine.connect() as connection:
         result = connection.execute(query, params).fetchone()
