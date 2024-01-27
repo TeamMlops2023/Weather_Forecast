@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: test
   name: mysqld-exporter
   labels:
     app: mysqld-exporter
