@@ -2,8 +2,6 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import joblib
-import os
 import mysql.connector
 from mysql.connector import Error
 import time
@@ -61,14 +59,23 @@ model.fit(X_train, y_train)
 # Prédiction
 predictions = model.predict(X_test)
 
-# Insertion des prédictions dans la base de données au fur et à mesure qu'elles sont générées
+# Insertion des prédictions dans la base de données
 for i in range(len(predictions)):
     date = df.iloc[i]['date']
     location = df.iloc[i]['location']
-    prediction = predictions[i].item()  # Convertit numpy.int64 en int
-    accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
-    insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
-    cursor.execute(insert_query, (date, location, prediction, accuracy))
+    prediction = predictions[i].item()
+    accuracy = model.score(X_test, y_test)  # Calcul de l'exactitude du modèle
+
+    # Vérification si l'entrée existe déjà
+    check_query = "SELECT EXISTS(SELECT 1 FROM weather_predictions WHERE date=%s AND location=%s)"
+    cursor.execute(check_query, (date, location))
+    exists = cursor.fetchone()[0]
+
+    if not exists:
+        insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
+        cursor.execute(insert_query, (date, location, prediction, accuracy))
+    else:
+        print(f"Entrée pour {date} et {location} existe déjà.")
 
 # Commit des modifications dans la base de données
 db.commit()
