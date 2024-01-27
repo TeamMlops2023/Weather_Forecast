@@ -2,13 +2,12 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import joblib
-import os
 import mysql.connector
+import os
 from mysql.connector import Error
 import time
 
-# Pause pendant 20 secondes
+# Pause pendant 20 secondes pour s'assurer que la base de données est prête
 time.sleep(20)
 
 # Paramètres de réessai de connexion
@@ -37,7 +36,7 @@ if attempt_count == max_attempts:
     exit(1)
 
 # Chemin vers le fichier de données
-chemin_fichier_donnees = os.path.join('data', 'data_features_with_location.csv')
+chemin_fichier_donnees = 'data/data_features_with_location.csv'
 
 # Charger les données
 df = pd.read_csv(chemin_fichier_donnees)
@@ -66,9 +65,18 @@ for i in range(len(predictions)):
     date = df.iloc[i]['date']
     location = df.iloc[i]['location']
     prediction = predictions[i].item()  # Convertit numpy.int64 en int
-    accuracy = 0.8864667858616422  # Remplacez par votre valeur d'exactitude réelle
-    insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
-    cursor.execute(insert_query, (date, location, prediction, accuracy))
+    accuracy = model.score(X_test, y_test)  # Calcul de l'exactitude du modèle
+
+    # Vérification si l'entrée existe déjà
+    check_query = "SELECT EXISTS(SELECT 1 FROM weather_predictions WHERE date=%s AND location=%s)"
+    cursor.execute(check_query, (date, location))
+    exists = cursor.fetchone()[0]
+
+    if not exists:
+        insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
+        cursor.execute(insert_query, (date, location, prediction, accuracy))
+    else:
+        print(f"Entrée pour {date} et {location} existe déjà.")
 
 # Commit des modifications dans la base de données
 db.commit()
@@ -78,4 +86,4 @@ cursor.close()
 db.close()
 
 # Affichage des prédictions
-print(predictions)
+print("Prédictions effectuées avec succès.")
