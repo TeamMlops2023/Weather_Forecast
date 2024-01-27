@@ -17,7 +17,6 @@ attempt_count = 0
 
 while attempt_count < max_attempts:
     try:
-        # Tentative de connexion à la base de données
         print(f"Tentative de connexion à la base de données, essai {attempt_count + 1}")
         db = mysql.connector.connect(
             host="database-service",
@@ -70,31 +69,32 @@ predictions = model.predict(X_test)
 print("Prédictions réalisées.")
 
 # Insertion des prédictions dans la base de données
-for i in range(len(predictions)):
-    date = df.iloc[i]['date']
-    location = df.iloc[i]['location']
-    prediction = predictions[i].item()
-    accuracy = model.score(X_test, y_test)
+try:
+    for i in range(len(predictions)):
+        date = df.iloc[i]['date']
+        location = df.iloc[i]['location']
+        prediction = predictions[i].item()
+        accuracy = model.score(X_test, y_test)
 
-    # Vérification si l'entrée existe déjà
-    check_query = "SELECT EXISTS(SELECT 1 FROM weather_predictions WHERE date=%s AND location=%s)"
-    cursor.execute(check_query, (date, location))
-    exists = cursor.fetchone()[0]
+        check_query = "SELECT EXISTS(SELECT 1 FROM weather_predictions WHERE date=%s AND location=%s)"
+        cursor.execute(check_query, (date, location))
+        exists = cursor.fetchone()[0]
 
-    if not exists:
-        insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
-        cursor.execute(insert_query, (date, location, prediction, accuracy))
-        print(f"Insertion de la prédiction pour {date} et {location}.")
-    else:
-        print(f"Entrée pour {date} et {location} existe déjà.")
+        if not exists:
+            insert_query = "INSERT INTO weather_predictions (date, location, prediction, accuracy) VALUES (%s, %s, %s, %s)"
+            cursor.execute(insert_query, (date, location, prediction, accuracy))
+            db.commit()  # Commit après chaque insertion réussie
+            print(f"Insertion de la prédiction pour {date} et {location}.")
+        else:
+            print(f"Entrée pour {date} et {location} existe déjà.")
+except Error as e:
+    print(f"Erreur SQL : {e}")
 
-# Commit des modifications dans la base de données
-db.commit()
-print("Modifications commitées dans la base de données.")
+finally:
+    # Fermeture de la connexion à la base de données
+    if db.is_connected():
+        cursor.close()
+        db.close()
+        print("Connexion à la base de données fermée.")
 
-# Fermeture de la connexion à la base de données
-cursor.close()
-db.close()
-
-# Affichage des prédictions
 print("Prédictions effectuées avec succès et enregistrées dans la base de données.")
