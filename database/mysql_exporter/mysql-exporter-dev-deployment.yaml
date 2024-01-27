@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dev
+  name: mysqld-exporter
+  labels:
+    app: mysqld-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysqld-exporter
+  template:
+    metadata:
+      labels:
+        app: mysqld-exporter
+    spec:
+      containers:
+      - name: mysqld-exporter
+        image: prom/mysqld-exporter:v0.12.1
+        env:
+        - name: DATA_SOURCE_NAME
+          value: "mlops:mlops@tcp(10.96.165.120:3306)/mlops_weather"
+        ports:
+        - containerPort: 9104
