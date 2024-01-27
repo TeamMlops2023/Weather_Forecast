@@ -18,7 +18,7 @@ spec:
           image: mlopsweather2023/ml-model-image:latest
           env:
             - name: MYSQL_HOST
-              value: mysql-service
+              value: "database-service.test"
             - name: MYSQL_USER
               value: "root"
             - name: MYSQL_PASSWORD
