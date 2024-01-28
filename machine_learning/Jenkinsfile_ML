@@ -51,12 +51,23 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
+                    // Copier les fichiers YAML de déploiement et de service
                     sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment.yaml .'
                     sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service.yaml .'
+
+                    // Copier les fichiers dans les namespaces test, dev et prod
                     sh 'docker cp ./ml-deployment.yaml kind-control-plane:/ml-deployment.yaml'
                     sh 'docker cp ./ml-service.yaml kind-control-plane:/ml-service.yaml'
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --validate=false"
+
+                    // Appliquer les configurations dans les namespaces respectifs
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=test --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=dev --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=prod --validate=false"
+
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=test --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=dev --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=prod --validate=false"
+
                     echo 'Déploiement ML Model sur Kubernetes réussi.'
                 }
             }
@@ -64,7 +75,7 @@ pipeline {
         stage('Wait for Pod Initialization') {
             steps {
                 script {
-                    echo "Attente pour l'initialisation du pod..."
+                    echo "Attente pour l'initialisation des pods..."
                     sh 'sleep 60' // Attente de 60 secondes
                 }
             }
@@ -72,7 +83,10 @@ pipeline {
     }
     post {
         always {
-            echo 'Pipeline ML Model terminé. Vérifiez les logs pour les détails.'
+            echo 'Pipeline ML Model terminée. Vérifiez les logs pour les détails.'
+        }
+        failure {
+            echo "La construction a échoué."
         }
     }
 }
