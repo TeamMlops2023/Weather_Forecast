@@ -7,6 +7,9 @@ from mysql.connector import Error
 import os
 import time
 
+# Récupérez la variable d'environnement qui indique l'environnement actuel
+environment = os.environ.get("ML_ENVIRONMENT", "test")  # Par défaut, c'est "test" si la variable n'est pas définie
+
 # Pause pendant 20 secondes pour s'assurer que la base de données est prête
 print("Attente de 20 secondes avant de commencer...")
 time.sleep(20)
