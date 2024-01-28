@@ -1,24 +1,24 @@
 pipeline {
     agent any
     environment {
-        KUBECONFIG = '/var/jenkins_home/.kube/config' // Chemin d'accès au fichier de configuration Kubernetes
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
     stages {
         stage('Prepare Environment') {
             steps {
-                sh 'rm -rf Weather_Forecast' // Nettoyage de l'environnement en supprimant le dossier existant
+                sh 'rm -rf Weather_Forecast'
             }
         }
         stage('Clone Repository') {
             steps {
-                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git' // Clonage du dépôt Git
+                sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi' // Construction de l'image Docker
+                        sh 'docker build -t mlopsweather2023/fastapi-image:latest ./fastapi'
                         echo 'Construction de l\'image Docker réussie.'
                     }
                 }
@@ -27,7 +27,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest' // Exécution d'un conteneur Docker pour les tests
+                    sh 'docker run -d --name fastapi-container -p 8000:8000 mlopsweather2023/fastapi-image:latest'
                     CONTAINER_IP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fastapi-container", returnStdout: true).trim()
                     echo "L'adresse IP du conteneur FastAPI est ${CONTAINER_IP}"
                 }
@@ -36,8 +36,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'sleep 10' // Pause pour permettre au serveur FastAPI de démarrer
-                    sh "docker exec fastapi-container python /app/tests/test_fastapi.py" // Exécution des tests
+                    sh 'sleep 10'
+                    sh "docker exec fastapi-container python /app/tests/test_fastapi.py"
                 }
             }
         }
@@ -45,8 +45,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin' // Connexion à Docker Hub
-                        sh 'docker push mlopsweather2023/fastapi-image:latest' // Envoi de l'image sur Docker Hub
+                        sh 'echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin'
+                        sh 'docker push mlopsweather2023/fastapi-image:latest'
                         echo 'Image Docker poussée vers Docker Hub.'
                     }
                 }
@@ -55,8 +55,8 @@ pipeline {
         stage('Cleanup Test Container') {
             steps {
                 script {
-                    sh 'docker stop fastapi-container || true' // Arrêt du conteneur de test
-                    sh 'docker rm fastapi-container || true' // Suppression du conteneur de test
+                    sh 'docker stop fastapi-container || true'
+                    sh 'docker rm fastapi-container || true'
                     echo 'Arrêt et nettoyage du conteneur de test réussi.'
                 }
             }
@@ -64,11 +64,13 @@ pipeline {
         stage('Deploy to Test Environment') {
             steps {
                 script {
-                    sh "docker exec kind-control-plane kubectl get ns test || docker exec kind-control-plane kubectl create ns test" // Vérification/création du namespace test
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml' // Copie du fichier de déploiement dans le cluster
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-test.yaml kind-control-plane:/ingress-test.yaml' // Copie du fichier ingress pour l'environnement de test
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=test" // Déploiement dans le namespace test
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress-test.yaml --namespace=test" // Application de la configuration ingress dans le namespace test
+                    sh "docker exec kind-control-plane kubectl get ns test || docker exec kind-control-plane kubectl create ns test"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment-test.yaml kind-control-plane:/fastapi-deployment-test.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-service-test.yaml kind-control-plane:/fastapi-service-test.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-test.yaml kind-control-plane:/ingress-test.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment-test.yaml --namespace=test"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service-test.yaml --namespace=test"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-test.yaml --namespace=test"
                     echo 'Déploiement dans l\'environnement de test réussi.'
                 }
             }
@@ -76,11 +78,13 @@ pipeline {
         stage('Deploy to Dev Environment') {
             steps {
                 script {
-                    sh "docker exec kind-control-plane kubectl get ns dev || docker exec kind-control-plane kubectl create ns dev" // Vérification/création du namespace dev
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml' // Copie du fichier de déploiement dans le cluster
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-dev.yaml kind-control-plane:/ingress-dev.yaml' // Copie du fichier ingress pour l'environnement de développement
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=dev" // Déploiement dans le namespace dev
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress-dev.yaml --namespace=dev" // Application de la configuration ingress dans le namespace dev
+                    sh "docker exec kind-control-plane kubectl get ns dev || docker exec kind-control-plane kubectl create ns dev"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment-dev.yaml kind-control-plane:/fastapi-deployment-dev.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-service-dev.yaml kind-control-plane:/fastapi-service-dev.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-dev.yaml kind-control-plane:/ingress-dev.yaml'
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment-dev.yaml --namespace=dev"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service-dev.yaml --namespace=dev"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-dev.yaml --namespace=dev"
                     echo 'Déploiement dans l\'environnement de développement réussi.'
                 }
             }
@@ -88,14 +92,16 @@ pipeline {
         stage('Deploy to Prod Environment') {
             steps {
                 script {
-                    sh "docker exec kind-control-plane kubectl get ns prod || docker exec kind-control-plane kubectl create ns prod" // Vérification/création du namespace prod
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment.yaml kind-control-plane:/fastapi-deployment.yaml' // Copie du fichier de déploiement dans le cluster
-                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-prod.yaml kind-control-plane:/ingress-prod.yaml' // Copie du fichier ingress pour l'environnement de production
+                    sh "docker exec kind-control-plane kubectl get ns prod || docker exec kind-control-plane kubectl create ns prod"
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-deployment-prod.yaml kind-control-plane:/fastapi-deployment-prod.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/fastapi-service-prod.yaml kind-control-plane:/fastapi-service-prod.yaml'
+                    sh 'docker cp ./Weather_Forecast/kubernetes/fastapi/ingress-prod.yaml kind-control-plane:/ingress-prod.yaml'
                     timeout(time: 15, unit: 'MINUTES') {
                         input message: 'Voulez-vous déployer en production ?', ok: 'Déployer'
                     }
-                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment.yaml --namespace=prod" // Déploiement dans le namespace prod
-                    sh "docker exec kind-control-plane kubectl apply -f /ingress-prod.yaml --namespace=prod" // Application de la configuration ingress dans le namespace prod
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-deployment-prod.yaml --namespace=prod"
+                    sh "docker exec kind-control-plane kubectl apply -f /fastapi-service-prod.yaml --namespace=prod"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress-prod.yaml --namespace=prod"
                     echo 'Déploiement dans l\'environnement de production réussi.'
                 }
             }
@@ -103,10 +109,10 @@ pipeline {
     }
     post {
         always {
-            echo 'Pipeline terminé. Vérifiez les logs pour les détails.' // Message de fin de pipeline
+            echo 'Pipeline terminé. Vérifiez les logs pour les détails.'
         }
         failure {
-            echo "La construction a échoué." // Message en cas d'échec de la construction
+            echo "La construction a échoué."
         }
     }
 }
