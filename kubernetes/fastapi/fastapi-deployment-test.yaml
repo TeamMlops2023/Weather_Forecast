@@ -2,7 +2,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-deployment # Nom du déploiement 
+  name: fastapi-deployment # Nom du déploiement
+  namespace: dev # namespace
 spec:
   replicas: 1 # Nombre de pods à déployer
   selector:
