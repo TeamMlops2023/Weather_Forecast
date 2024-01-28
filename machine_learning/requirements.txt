@@ -2,3 +2,4 @@ pandas
 scikit-learn
 Flask
 mysql-connector-python
+prometheus_client
