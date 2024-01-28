@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: mysql
+        image: mlopsweather2023/mysql-image:latest
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "mysecretpassword"
+        - name: MYSQL_DATABASE
+          value: "mlops_weather"
+        volumeMounts:
+        - name: init-db
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: init-db
+        configMap:
+          name: mysql-init-script
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+data:
+  init.sql: |
+    -- Vérifiez si la base de données existe, sinon créez-la
+    CREATE DATABASE IF NOT EXISTS mlops_weather;
+    USE mlops_weather;
+
+    -- Créez la table weather_predictions si elle n'existe pas
+    CREATE TABLE IF NOT EXISTS weather_predictions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        date DATE,
+        location VARCHAR(255),
+        prediction INT,
+        accuracy FLOAT
+    );
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "9104"
+spec:
+  selector:
+    app: database
+  ports:
+  - port: 3306
+    targetPort: 3306
