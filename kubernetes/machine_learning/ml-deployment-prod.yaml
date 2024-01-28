@@ -17,6 +17,8 @@ spec:
         - name: ml-model
           image: mlopsweather2023/ml-model-image:latest
           env:
+            - name: ML_ENVIRONMENT
+              value: "prod"
             - name: MYSQL_HOST
               value: "database-service.test"
             - name: MYSQL_USER
