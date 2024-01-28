@@ -76,7 +76,7 @@ pipeline {
             steps {
                 script {
                     echo "Attente pour l'initialisation des pods..."
-                    sh 'sleep 60' // Attente de 60 secondes
+                    sh 'sleep 30' // Attente de 30 secondes
                 }
             }
         }
