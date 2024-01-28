@@ -1,0 +1,30 @@
+# Configuration du déploiement FastAPI
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-deployment # Nom du déploiement
+  namespace: dev # namespace
+spec:
+  replicas: 1 # Nombre de pods à déployer
+  selector:
+    matchLabels:
+      app: fastapi # Sélectionne les pods avec l'étiquette 'app' ayant la valeur 'fastapi'
+  template:
+    metadata:
+      labels:
+        app: fastapi # Applique l'étiquette 'app' avec la valeur 'fastapi' aux pods créés
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+      - name: fastapi-container # Nom du conteneur
+        image: mlopsweather2023/fastapi-image:latest # Image Docker à utiliser pour ce conteneur
+        ports:
+        - containerPort: 8000 # Port sur lequel le conteneur écoute
+
+# Commentaires :
+# Le code ci-dessus définit un déploiement Kubernetes qui déploie un seul pod FastAPI.
+# Les annotations ajoutées indiquent à Prometheus de scraper ce pod pour les métriques.
+# Assurez-vous que votre application FastAPI expose des métriques sur le chemin "/metrics".
