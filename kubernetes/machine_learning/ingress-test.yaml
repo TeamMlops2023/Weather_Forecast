@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ml-ingress-test
+  namespace: test
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /ml-test
+        pathType: Prefix
+        backend:
+          service:
+            name: ml-model-service
+            port:
+              number: 80
