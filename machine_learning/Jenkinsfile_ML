@@ -48,27 +48,69 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes (Test)') {
             steps {
                 script {
-                    // Copier les fichiers YAML de déploiement et de service
-                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment.yaml .'
-                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service.yaml .'
+                    // Copier les fichiers YAML de déploiement, de service et d'ingress pour l'environnement de test
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment-test.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service-test.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ingress-test.yaml .'
 
-                    // Copier les fichiers dans les namespaces test, dev et prod
-                    sh 'docker cp ./ml-deployment.yaml kind-control-plane:/ml-deployment.yaml'
-                    sh 'docker cp ./ml-service.yaml kind-control-plane:/ml-service.yaml'
+                    // Copier les fichiers dans le namespace de test
+                    sh 'docker cp ./ml-deployment-test.yaml kind-control-plane:/ml-deployment.yaml'
+                    sh 'docker cp ./ml-service-test.yaml kind-control-plane:/ml-service.yaml'
+                    sh 'docker cp ./ingress-test.yaml kind-control-plane:/ingress.yaml'
 
-                    // Appliquer les configurations dans les namespaces respectifs
+                    // Appliquer les configurations dans le namespace de test
                     sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=test --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=dev --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=prod --validate=false"
-
                     sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=test --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=dev --validate=false"
-                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=prod --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --namespace=test --validate=false"
 
-                    echo 'Déploiement ML Model sur Kubernetes réussi.'
+                    echo 'Déploiement ML Model sur Kubernetes (Test) réussi.'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes (Dev)') {
+            steps {
+                script {
+                    // Copier les fichiers YAML de déploiement, de service et d'ingress pour l'environnement de dev
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment-dev.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service-dev.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ingress-dev.yaml .'
+
+                    // Copier les fichiers dans le namespace de dev
+                    sh 'docker cp ./ml-deployment-dev.yaml kind-control-plane:/ml-deployment.yaml'
+                    sh 'docker cp ./ml-service-dev.yaml kind-control-plane:/ml-service.yaml'
+                    sh 'docker cp ./ingress-dev.yaml kind-control-plane:/ingress.yaml'
+
+                    // Appliquer les configurations dans le namespace de dev
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=dev --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=dev --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --namespace=dev --validate=false"
+
+                    echo 'Déploiement ML Model sur Kubernetes (Dev) réussi.'
+                }
+            }
+        }
+        stage('Deploy to Kubernetes (Prod)') {
+            steps {
+                script {
+                    // Copier les fichiers YAML de déploiement, de service et d'ingress pour l'environnement de prod
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-deployment-prod.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ml-service-prod.yaml .'
+                    sh 'cp Weather_Forecast/kubernetes/machine_learning/ingress-prod.yaml .'
+
+                    // Copier les fichiers dans le namespace de prod
+                    sh 'docker cp ./ml-deployment-prod.yaml kind-control-plane:/ml-deployment.yaml'
+                    sh 'docker cp ./ml-service-prod.yaml kind-control-plane:/ml-service.yaml'
+                    sh 'docker cp ./ingress-prod.yaml kind-control-plane:/ingress.yaml'
+
+                    // Appliquer les configurations dans le namespace de prod
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-deployment.yaml --namespace=prod --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ml-service.yaml --namespace=prod --validate=false"
+                    sh "docker exec kind-control-plane kubectl apply -f /ingress.yaml --namespace=prod --validate=false"
+
+                    echo 'Déploiement ML Model sur Kubernetes (Prod) réussi.'
                 }
             }
         }
