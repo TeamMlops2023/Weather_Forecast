@@ -6,6 +6,13 @@ import mysql.connector
 from mysql.connector import Error
 import os
 import time
+from prometheus_client import start_http_server, Summary
+
+# Créez une métrique pour suivre le temps passé et les requêtes faites.
+REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
+
+# Démarrez le serveur pour exposer les métriques. Utilisez le port 80 si c'est le port que vous avez configuré pour Prometheus.
+start_http_server(80)
 
 # Récupérez la variable d'environnement qui indique l'environnement actuel
 environment = os.environ.get("ML_ENVIRONMENT", "test")  # Par défaut, c'est "test" si la variable n'est pas définie
