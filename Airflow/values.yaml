@@ -1,24 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-deployment
+  name: airflow
 spec:
-  replicas: 3
-
-airflow:
-  image:
-    repository: apache/airflow
-    tag: 2.1.0
-  executor: CeleryExecutor
-  extraPackages:  # Ajoutez cette section
-    - kubernetes==19.15.0  # Utilisez la version appropriée de la bibliothèque Kubernetes
-
-webserver:
-  service:
-    type: LoadBalancer
-
-scheduler:
-  resources:
-    requests:
-      cpu: "1"
-      memory: "2Gi"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      containers:
+        - name: airflow
+          image: apache/airflow:2.1.0
+          ports:
+            - containerPort: 8080
+          args:
+            - "webserver"
