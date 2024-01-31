@@ -3,6 +3,8 @@ airflow:
     repository: apache/airflow
     tag: 2.1.0
   executor: CeleryExecutor
+  extraPackages:  # Ajoutez cette section
+    - kubernetes==19.15.0  # Utilisez la version appropriée de la bibliothèque Kubernetes
 
 webserver:
   service:
