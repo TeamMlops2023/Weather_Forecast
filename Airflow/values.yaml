@@ -1,15 +1,8 @@
-postgresql:
-  enabled: false
-
 airflow:
   image:
     repository: apache/airflow
     tag: 2.1.0
   executor: CeleryExecutor
-  extraPipPackages:
-    - "mysqlclient==1.4.6"
-  config:
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN: "mysql+pymysql://mlops:mlops@<MySQL-Service-Name>:3306/mlops_weather"
 
 webserver:
   service:
