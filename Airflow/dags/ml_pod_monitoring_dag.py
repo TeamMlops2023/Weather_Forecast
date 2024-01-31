@@ -24,9 +24,9 @@ dag = DAG(
 start = DummyOperator(task_id='start', dag=dag)
 
 monitor_ml_pod = KubernetesPodOperator(
-    namespace='default',
+    namespace='test',  
     image='alpine',
-    cmds=["sh", "-c", "kubectl get pods -n test | grep ml-model-deployment-7ccc6bb9f7-2694b"],
+    cmds=["sh", "-c", "kubectl get pods | grep ml-model-deployment-7ccc6bb9f7-2694b"],
     name='monitor-ml-pod',
     task_id='monitor_ml_pod_task',
     get_logs=True,
