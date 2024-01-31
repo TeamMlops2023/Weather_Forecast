@@ -1,1 +1,21 @@
+airflow:
+  image:
+    repository: apache/airflow
+    tag: 2.1.0
+  executor: CeleryExecutor
 
+webserver:
+  service:
+    type: LoadBalancer
+
+scheduler:
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+
+postgresql:
+  enabled: true
+  postgresqlUsername: airflow
+  postgresqlPassword: airflow
+  postgresqlDatabase: airflow
