@@ -2,7 +2,8 @@ version: '3'
 services:
   webserver:
     image: apache/airflow:2.8.1
-    command: webserver
+    command: >
+      bash -c "airflow db upgrade && airflow users create --username admin --firstname FIRSTNAME --lastname LASTNAME --role Admin --email admin@example.com --password admin && airflow webserver"
     ports:
       - "8090:8080"
     volumes:
