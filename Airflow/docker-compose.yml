@@ -2,10 +2,19 @@ version: '3'
 services:
   webserver:
     image: apache/airflow:2.8.1
-    command: >
-      bash -c "airflow db upgrade && airflow webserver"
+    command: webserver
     ports:
       - "8090:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    restart: always
+
+  scheduler:
+    image: apache/airflow:2.8.1
+    command: scheduler
     volumes:
       - ./dags:/opt/airflow/dags
     environment:
