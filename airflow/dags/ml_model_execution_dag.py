@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.providers.celery.operators.celery import CeleryOperator
+from airflow.providers.celery.operators.celery import KubernetesPodOperator
 from airflow.utils.dates import days_ago
 
 default_args = {
@@ -8,17 +9,20 @@ default_args = {
     'start_date': days_ago(1),
 }
 
-dag = DAG(
+with DAG(
     'ml_model_execution',
     default_args=default_args,
-    description='Un DAG pour exécuter un modèle ML dans un pod Kubernetes',
+    description='A DAG to execute an ML model task',
     schedule_interval=None,
-)
+) as dag:
 
-# Utilisez CeleryOperator ou un opérateur adapté pour votre cas d'utilisation
-run_ml_model = CeleryOperator(
-    task_id='run_ml_model',
-    python_callable=<callable>,
-    op_kwargs={'key': 'value'},  # Remplacez par les arguments nécessaires
-    dag=dag,
-)
+    task1 = KubernetesPodOperator(
+        namespace='test',
+        image='mlopsweather2023/ml-model-image:latest',
+        cmds=["python", "modele.py"],
+        name="ml-model-task",
+        task_id="run_ml_model",
+        is_delete_operator_pod=False,
+        in_cluster=True,
+        get_logs=True,
+    )
