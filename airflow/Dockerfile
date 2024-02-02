@@ -1,14 +1,10 @@
-# Utilisez l'image officielle d'Airflow avec un tag spécifique comme base
+# Utilisez l'image officielle d'Airflow comme base
 FROM apache/airflow:2.2.3
 
-# (Optionnel) Installez des dépendances supplémentaires ou des outils, par exemple `kubectl`
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copiez vos DAGs dans l'image
-COPY --chown=airflow:airflow ./dags /opt/airflow/dags
+COPY ./dags /opt/airflow/dags
 
-# Changez l'utilisateur en airflow
+# Assurez-vous que les permissions sont correctes
+USER root
+RUN chown -R airflow: /opt/airflow/dags
 USER airflow
