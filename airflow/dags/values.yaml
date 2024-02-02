@@ -1,0 +1,23 @@
+airflow:
+  image:
+    repository: <your_custom_airflow_image_repository>
+    tag: <your_custom_tag>
+    pullPolicy: IfNotPresent
+  executor: CeleryExecutor
+
+  # Assurez-vous d'activer l'accès au cluster Kubernetes pour le KubernetesPodOperator
+  kubernetesPodOperator:
+    in_cluster: true
+
+  config:
+    AIRFLOW__KUBERNETES__IN_CLUSTER: "True"
+    AIRFLOW__KUBERNETES__NAMESPACE: "test"
+    # Ajoutez ici d'autres configurations Airflow au besoin
+
+webserver:
+  service:
+    type: LoadBalancer
+
+dags:
+  persistence:
+    enabled: true
