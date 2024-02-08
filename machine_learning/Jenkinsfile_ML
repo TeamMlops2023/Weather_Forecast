@@ -10,6 +10,23 @@ pipeline {
                 sh 'git clone -b BAS_ALAIN --single-branch https://github.com/TeamMlops2023/Weather_Forecast.git'
             }
         }
+        stage('Pre-Build Test') { // Nouvelle étape ajoutée ici pour exécuter les tests dans un conteneur temporaire
+            steps {
+                script {
+                    // Nettoyer le conteneur s'il existe déjà
+                    sh 'docker stop pre-build-test-container || true'
+                    sh 'docker rm pre-build-test-container || true'
+
+                    // Créer un conteneur temporaire pour exécuter les tests
+                    sh 'docker run --name pre-build-test-container -d mlopsweather2023/ml-model-image:latest'
+                    sh 'docker exec pre-build-test-container python /app/tests/test_modele.py'
+
+                    // Nettoyer le conteneur après les tests
+                    sh 'docker stop pre-build-test-container'
+                    sh 'docker rm pre-build-test-container'
+                }
+            }
+        }
         stage('Build ML Model Image') {
             steps {
                 script {
