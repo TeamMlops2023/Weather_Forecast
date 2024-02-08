@@ -1,48 +1,32 @@
-Installation de Prometheus et Grafana avec Helm sur Kubernetes
-Ce document décrit les étapes pour déployer Prometheus et Grafana dans un cluster Kubernetes en utilisant Helm, 
-ainsi que la fonction des fichiers de configuration clés.
+Monitoring avec Prometheus Operator et Grafana
+Ce répertoire contient la configuration et les ressources nécessaires pour déployer et configurer le monitoring dans un cluster Kubernetes en utilisant Prometheus Operator et Grafana. 
+Ces outils sont installés et gérés via Helm charts.
+
+À propos
+Prometheus Operator fournit une approche Kubernetes-native pour déployer et gérer Prometheus et ses ressources associées. 
+Grafana est utilisé pour visualiser les données collectées par Prometheus. L'utilisation de Helm charts facilite l'installation, la mise à jour, et la gestion de ces composants.
 
 Prérequis
-Un cluster Kubernetes opérationnel
-Helm installé sur votre machine locale
-Accès au cluster via kubectl
+Un cluster Kubernetes
+Helm installé et configuré sur votre machine ou dans votre environnement CI/CD
+Accès au cluster Kubernetes avec les droits nécessaires pour déployer des applications
+Installation
+Les installations de Prometheus Operator et Grafana sont réalisées à l'aide de Helm charts. Voici les étapes générales pour l'installation :
 
-Installation avec Helm
-Helm est un gestionnaire de paquets pour Kubernetes qui permet de faciliter l'installation et la gestion d'applications.
-
-Installation de Prometheus
+Ajout des dépôts Helm :
+shell
+Copy code
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-Cette commande ajoute le dépôt de charts Prometheus à Helm et met à jour votre index local des charts disponibles.
-
-Installation de Prometheus :
-helm install prometheus prometheus-community/prometheus
-Cette commande installe Prometheus en utilisant le chart Helm de la communauté Prometheus. Elle déploie Prometheus avec la configuration par défaut.
-
-Installation de Grafana
-Ajout du dépôt Helm :
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
-Similaire à Prometheus, cette commande ajoute le dépôt de charts Grafana à Helm.
+Installation de Prometheus Operator :
 
+shell
+Copy code
+helm install prometheus-operator prometheus-community/kube-prometheus-stack
 Installation de Grafana :
+
+shell
+Copy code
 helm install grafana grafana/grafana
-Cette commande déploie Grafana dans votre cluster Kubernetes en utilisant le chart Helm officiel de Grafana.
-
-Fichiers de Configuration
-prometheus.yml
-Ce fichier est le fichier de configuration principal pour Prometheus. 
-Il définit les paramètres de scraping (collecte) des métriques, les règles d'alerte, et d'autres options de configuration de Prometheus.
-
-grafana.ini
-Ce fichier est le fichier de configuration principal pour Grafana. 
-Il contient les configurations pour l'interface utilisateur de Grafana, les options de sécurité, les paramètres de base de données, 
-et d'autres paramètres d'application.
-
-values.yaml pour Prometheus
-Ce fichier est utilisé pour personnaliser l'installation du chart Prometheus. 
-Il permet de définir des configurations spécifiques, comme les ressources allouées, les annotations de pod, les politiques de rétention...
-
-grafana-values.yaml pour Grafana
-Similaire au values.yaml pour Prometheus, ce fichier est utilisé pour personnaliser l'installation de Grafana. 
-Il peut être utilisé pour configurer des sources de données, des tableaux de bord par défaut, des plugins, et d'autres paramètres spécifiques à Grafana.
+Note : Ces commandes installent Prometheus Operator et Grafana avec leur configuration par défaut. 
