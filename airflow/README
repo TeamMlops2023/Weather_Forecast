@@ -1,0 +1,9 @@
+Dockerfile
+Le Dockerfile utilise l'image officielle Apache Airflow version 2.2.3 comme base, et copie les DAGs dans l'image. 
+Les permissions sont ajustées pour s'assurer que Airflow peut accéder et exécuter les DAGs.
+
+DAG
+Le DAG ml_model_execution est conçu pour exécuter une tâche de modèle ML en utilisant un KubernetesPodOperator.
+
+values.yaml
+La configuration Helm spécifie l'utilisation d'une image Airflow personnalisée, le type d'exécuteur (CeleryExecutor) et active l'accès au cluster Kubernetes pour le KubernetesPodOperator.
