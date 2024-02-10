@@ -1,76 +1,78 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query, HTTPException
+import uvicorn
 from pydantic import BaseModel
-from sqlalchemy import create_engine, text
-from datetime import date
-from prometheus_fastapi_instrumentator import Instrumentator
+from sqlalchemy.engine import create_engine
+from datetime import datetime, timedelta
 import os
 
+# Création d'une instance FastAPI
 app = FastAPI()
 
-# Instrumentation pour Prometheus
-Instrumentator().instrument(app).expose(app)
 
-# Adresse IP du conteneur MySQL
-mysql_ip = '10.96.39.152'  # Utilisez l'adresse IP de votre conteneur MySQL
-
-# Variables de connexion à la base de données
-mysql_user = os.environ.get('MYSQL_USER', 'mlops')
-mysql_password = os.environ.get('MYSQL_PASSWORD', 'mlops')
+# Création de la connection à la base sql
+# Variable de connection
+mysql_url = os.environ.get('MYSQL_URL')
+mysql_user = 'root'
+mysql_password = 'mysecretpassword'  # to complete
 database_name = 'mlops_weather'
 
-# Création de l'URL de connexion
-connection_url = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_ip}/{database_name}'
+# Création de l'URL de connection
+connection_url = 'mysql://{user}:{password}@{url}/{database}'.format(
+    user=mysql_user,
+    password=mysql_password,
+    url=mysql_url,
+    database=database_name
+)
 
-# Création de la connexion
+# Création de la connection
 mysql_engine = create_engine(connection_url)
 
-class WeatherPrediction(BaseModel):
-    date: date
-    location: str
-    prediction: int
-    accuracy: float
+# creation de la classe prediction
+class predict(BaseModel):
+    date: datetime = 99991231
+    ville: str = 'paris'
+    prediction: str = 'ne sait pas'
+    proba: float = 0.5
 
+# Définition de l'endpoint racine ("/")
 @app.get("/")
 async def read_root():
+    # Renvoie un message JSON lorsque quelqu'un accède à la racine de l'application
     return {"Hello": "World"}
 
+# Définition de l'endpoint "/status"
 @app.get("/status")
 async def get_status():
-    return {"status": "ok"}
+    # Renvoie un statut ok = 1
+    return 1
 
-@app.get("/echo")
-async def echo(text: str):
-    return {"echo": text}
-
-@app.get("/predictions")
-async def get_weather_predictions(location: str, prediction_date: date = Query(None)):
-    if prediction_date:
-        query = text("""
-        SELECT date, location, prediction, accuracy
-        FROM weather_predictions
-        WHERE location = :location AND date = :prediction_date
-        ORDER BY date DESC
-        LIMIT 1;
-        """)
-        params = {'location': location, 'prediction_date': prediction_date}
-    else:
-        query = text("""
-        SELECT date, location, prediction, accuracy
-        FROM weather_predictions
-        WHERE location = :location
-        ORDER BY date DESC
-        LIMIT 1;
-        """)
-        params = {'location': location}
+# Définition de l'endpoint "/prediction" avec un paramètre de requête textuel
+@app.get('/prediction/{ville:str}', response_model=predict)
+async def get_prediction(ville):
+    date_format = "%Y%m%d"
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow = tomorrow.strftime(date_format)
 
     with mysql_engine.connect() as connection:
-        result = connection.execute(query, params).fetchone()
+        results = connection.execute(
+            'SELECT * FROM weather_predictions WHERE weather_predictions.ville = "{}" AND weather_predictions.date = "{}";'.format(ville, tomorrow))
 
-    if not result:
-        raise HTTPException(status_code=404, detail="No predictions found for the specified location and date")
+    results = [
+        predict(
+            date = i[0],
+            ville = i[1],
+            prediction = i[2],
+            proba = i[3]
+            ) for i in results.fetchall()]
 
-    return WeatherPrediction(date=result[0], location=result[1], prediction=result[2], accuracy=result[3])
+    if len(results) == 0:
+        raise HTTPException(
+            status_code=404,
+            detail='Prédiction non trouvée')
+    else:
+        return results[0]
 
+# Vérifie si le script est exécuté en tant que fichier principal
 if __name__ == "__main__":
-    import uvicorn
+    # Exécute l'application en utilisant Uvicorn avec les paramètres spécifiés
     uvicorn.run("app:app", host="0.0.0.0", port=8000, log_level="debug")
