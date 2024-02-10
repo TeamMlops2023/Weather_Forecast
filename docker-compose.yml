@@ -1,0 +1,26 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+      MYSQL_DATABASE: mlops_weather
+      MYSQL_USER: mlops
+      MYSQL_PASSWORD: mlops
+    ports:
+      - "3307:3306"
+
+  fastapi:
+    build:
+      context: ./fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+
+  machine-learning:
+    build:
+      context: ./machine_learning
+    depends_on:
+      - mysql
+    command: python modele.py
