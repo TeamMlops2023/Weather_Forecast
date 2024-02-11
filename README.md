@@ -1,7 +1,10 @@
 # Weather_Forecast  
 
 Notebook  
-* Code de recherche pour le modèle ML utilisé.  
+* Code de recherche pour le modèle ML utilisé.
+
+Documentations
+* Documentation et aide mis en place pour aider lors du développement du projet.
   
 Les 3 dossiers ci-dessous s'organise en plusieurs partie comptant le code qui définie l'outil, le code pour le test, le code pour containeriser et enfin le code pour l'automatiser sur Jenkins.  
   
