@@ -1,77 +1,28 @@
-### Weather_Forecast
+# Weather_Forecast
 
-# notebook
-    - ... ====> Ce dossier serait intéressant pour isoler le code du modèle ML utilisé qu'on intègrera par la suite à app.py via import
+Notebook
+    ====> Code de recherche pour le modèle ML utilisé.
 
-# code
-    # fastapi1 :
-        => bloc fastapi1 pour première api
-        # data :
-                - data_features_with_location.csv
-                    => contient les données nécessaires à l'entrainement du modèle.
-        # src :  
-             - app.py 
-                   => Code python définisant l'application Fastapi et le modèle utilisé (création, entrainement et prédiction)
-               - start_server.py
-                  => Code python exécutable qui sera utilisé pour lancer l'application Fastapi via uvicorn
-               - requirements.txt
-                   => liste des packages nécessaire pour l'exécution du code de src.
-               - model_logs.log
-                  => Fichier log créer par l'appel à fastapi /logs
-               - setup_test_fastapi.sh
-                  => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir tester le bloc fastapi
-              - setup_clean_fastapi.sh
-                   => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
-              - commandes_test_fastapi.txt
-                  => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
-        - Dockerfile
-        - setup_docker_hub.sh
-            => fichier bash pour auto l'envoi dans docker-hub de l'image
-    #  app2 :
-        => bloc test auto du bloc fastapi1
-        # data :
-                - data_features_with_location.csv
-                    => contient les données nécessaires à l'entrainement du modèle.
-        # src :  
-             - app.py 
-                   => Code python définisant l'application Fastapi et le modèle utilisé (création, entrainement et prédiction)
-               - start_server.py
-                  => Code python exécutable qui sera utilisé pour lancer l'application Fastapi via uvicorn
-               - requirements.txt
-                   => liste des packages nécessaire pour l'exécution du code de src.
-               - model_logs.log
-                  => Fichier log créer par l'appel à fastapi /logs
-               - setup_test_fastapi.sh
-                  => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir tester le bloc fastapi
-              - setup_clean_fastapi.sh
-                   => fichier bash pour lancer toutes les commandes d'un coup pour pouvoir nettoyer le bloc fastapi après phase de dev/test
-              - commandes_test_fastapi.txt
-                  => Listes des commandes pour tester fastapi de manière manuel (proto des blocs test à implémenter par la suite pour automatiser)
-        - Dockerfile
-        - setup_docker_hub.sh
-            => fichier bash pour auto l'envoi dans docker-hub de l'image
-            
-    - docker-compose.yml
-        => Docker-compose pour faire les tests d'intégration sur un ensemble docker
+Les 4 dossiers ci-dessous s'organise en plusieurs partie comptant le code qui définie l'outil, le code pour le test, le code pour containeriser et enfin le code pour l'automatiser sur Jenkins.
 
-# test
-    - test_metrics.py
-        => ...
-    - test_run_model.py
-        => ...
-    - test.txt
-        => ...
+Database
+    ====> Rassemble le code permettant de définir, tester et automatiser tout ce qui concerne la définition de la base de donnée mysql.
 
-# monitoring
-    - prometheus.yml
-        => fichier déclaratif du bloc prométheus
+Fastapi
+    ====> Rassemble le code permettant de définir, test et automatiser tout ce qui concerne la définition de l'api.
 
-# Jenkins
-    - Jenkinsfile
-        => Fichier exécutable pour Jenkins
-        
-# contributeurs.txt
-    => Fichir pour faire des test sur les commandes git/github
+Machine_learning
+    ====> Rassemble le code permettant de définir, test et automatiser tout ce qui concerne la définition du modèle avec la récupération des données et leur préprocess.
 
-# process.txt
-    => Fichier pour décrire le process et l'organisation du github
+Machine_learning
+    ====> Rassemble le code permettant de définir, test et automatiser tout ce qui concerne la définition du modèle avec la récupération des données et leur préprocess.
+
+
+Kubernetes
+    ====> Définition de l'architecture Kubernetes mise en place pour combiner l'ensemble des partie compossant l'application.
+
+Monitoring
+    ====> Défini l'ensemble permettant de monitoré l'application dans son utilisation automatiser et définie sur kubernetes.
+
+Dockerfile
+    ====> Définie le container pour installer le serveur Jenkins qui permettra l'automatisation de l'application.
