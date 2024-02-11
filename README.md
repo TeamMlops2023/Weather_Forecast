@@ -1,12 +1,12 @@
-# Weather_Forecast
+# Weather_Forecast  
 
-Notebook
-Code de recherche pour le modèle ML utilisé.
-
-Les 4 dossiers ci-dessous s'organise en plusieurs partie comptant le code qui définie l'outil, le code pour le test, le code pour containeriser et enfin le code pour l'automatiser sur Jenkins.
-
+Notebook  
+* Code de recherche pour le modèle ML utilisé.  
+  
+Les 4 dossiers ci-dessous s'organise en plusieurs partie comptant le code qui définie l'outil, le code pour le test, le code pour containeriser et enfin le code pour l'automatiser sur Jenkins.  
+  
 Database
-    ====> Rassemble le code permettant de définir, tester et automatiser tout ce qui concerne la définition de la base de donnée mysql.
+* Rassemble le code permettant de définir, tester et automatiser tout ce qui concerne la définition de la base de donnée mysql.  
 
 Fastapi
     ====> Rassemble le code permettant de définir, test et automatiser tout ce qui concerne la définition de l'api.
