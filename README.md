@@ -26,3 +26,6 @@ Airflow
   
 Dockerfile  
 * Définie le container pour installer le serveur Jenkins qui permettra l'automatisation de l'application.  
+
+Docker-compose
+* Fichier permettant des tests d'intégration directement via docker (en développement).
